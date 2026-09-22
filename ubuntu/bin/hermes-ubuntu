@@ -5,7 +5,7 @@ ROOT="${UBUNTU_AI_ROOT:-/opt/ubuntu-ai}"
 source "$ROOT/lib/models.sh"
 
 persona="${1:-durandal}"
-model="${2:-local-coder}"
+model="${2:-local-gemma4-12b}"
 shift $(( $# >= 1 ? 1 : 0 ))
 shift $(( $# >= 1 ? 1 : 0 ))
 
@@ -16,6 +16,13 @@ model_exists "$model" || { echo "Unknown model alias: $model" >&2; exit 2; }
   exit 2
 }
 
+runtime_context="$(model_field "$model" runtime_context)"
+if (( runtime_context < 64000 )); then
+  echo "Model $model has runtime context $runtime_context, below Hermes' 64K tool-use minimum." >&2
+  echo "Use it with OpenCode/direct chat instead." >&2
+  exit 2
+fi
+
 case "$persona" in
   durandal) skin="durandal-marathon" ;;
   guilty-spark) skin="guilty-spark-forerunner" ;;
@@ -23,7 +30,6 @@ case "$persona" in
   *) echo "Unknown persona: $persona" >&2; exit 2 ;;
 esac
 
-context="$(model_field "$model" context)"
 soul="$ROOT/personas/$persona/SOUL.md"
 skin_file="$ROOT/skins/$skin.yaml"
 [[ -r "$soul" && -r "$skin_file" ]] || {
@@ -42,7 +48,8 @@ model:
   default: $model:latest
   base_url: http://127.0.0.1:11435/v1
   api_key: ollama
-  context_length: $context
+  context_length: $runtime_context
+  ollama_num_ctx: $runtime_context
 agent:
   max_turns: 12
   api_max_retries: 1
