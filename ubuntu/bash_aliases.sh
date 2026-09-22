@@ -4,8 +4,8 @@ export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"
 # shellcheck shell=bash
 # Bash command layer for the standalone Ubuntu AI setup.
 
-alias ollama-models='ubuntu-ai-help'
-alias hermes-help='ubuntu-ai-help'
+alias ollama-models='nixai --help'
+alias hermes-help='nixai --help'
 
 alias ollama-get-coder='ubuntu-ai-model install local-coder'
 alias ollama-get-fast='ubuntu-ai-model install local-fast'
