@@ -79,7 +79,7 @@ After installation:
 
 ```bash
 source ~/.bashrc
-hermes-help
+nixai --help
 ```
 
 The installer uses the official Linux installers for Ollama, Hermes Agent, and OpenCode.
@@ -199,7 +199,15 @@ The install process first pulls the upstream Ollama model and then creates the t
 
 ## Terminal help
 
-Either command prints the full model, context, persona, and launcher table:
+The primary help command is:
+
+```bash
+nixai --help
+```
+
+It prints all configured models, sources, context windows, tool support, sampling parameters, Ollama/gateway limits, OpenCode aliases, Hermes aliases, direct chat-only aliases, model-management commands, and persona/skin mappings.
+
+These compatibility aliases show the same output:
 
 ```bash
 ollama-models
@@ -281,7 +289,17 @@ Any extra arguments are passed to Hermes.
 
 ## OpenCode
 
-The same nine local models are exposed through OpenCode:
+Every local OpenCode launcher enables [`opencode-mem`](https://github.com/tickernelz/opencode-mem) through OpenCode's native v2 `plugins` list. The published plugin package is downloaded automatically by OpenCode on first startup.
+
+The launcher seeds this file only if it does not already exist:
+
+```text
+~/.config/opencode/opencode-mem.jsonc
+```
+
+The seeded defaults keep storage local at `~/.opencode-mem/data`, expose the web UI only on `127.0.0.1:4747`, enable auto-capture, and use `ubuntu-local` with `opencodeModel: "inherit"`. Existing user edits are never overwritten on later launches. Manual memory search/add/list operations remain usable even if automatic capture cannot obtain structured output.
+
+The tool-capable local models are exposed through OpenCode:
 
 ```bash
 opencode-local
@@ -484,6 +502,7 @@ ubuntu/
 ├── bin/
 │   ├── hermes-ubuntu
 │   ├── opencode-ubuntu
+│   ├── nixai
 │   ├── ubuntu-ai-diagnose
 │   ├── ubuntu-ai-help
 │   └── ubuntu-ai-model
