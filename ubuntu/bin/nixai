@@ -37,11 +37,9 @@ case "${1:---help}" in
     OpenCode/Hermes max steps 12
     Thinking/reasoning       disabled by bounded gateway
     
-    OPENCODE PLUGINS
+    OPENCODE PLUGINS (OpenCode 1.x compatible)
     opencode-mem                         Persistent local vector memory + profile learning
     @nick-vi/opencode-type-inject       TypeScript/Svelte type context and diagnostics
-    @kitlangton/opencode-session-recap  One-line session recap after inactivity
-    @kitlangton/opencode-pr-tracker     PR + CI state in the TUI (requires gh auth login)
     @mohak34/opencode-notifier          Desktop/sound notifications
     @prevalentware/opencode-goal-plugin Persistent /goal workflow; bounded to 8 auto turns / 15 min
     @tarquinen/opencode-dcp             Dynamic context pruning; loaded last
@@ -56,7 +54,6 @@ case "${1:---help}" in
     Note                     Seeded once; user edits are preserved.
 
     PLUGIN RUNTIME
-    GitHub CLI               gh (authenticate once with: gh auth login)
     Desktop notifications    notify-send via libnotify-bin
     Goal max auto turns      8
     Goal max duration        900s
