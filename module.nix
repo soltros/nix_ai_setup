@@ -19,11 +19,28 @@ let
     local-gemma4-e4b = "gemma4:e4b";
     local-gemma4-12b = "gemma4:12b";
   };
+  modelContexts = {
+    local-coder = 262144;
+    local-fast = 262144;
+    local-deepseek-coder = 163840;
+    local-qwen-coder = 32768;
+    local-starcoder = 16384;
+    local-granite-code = 131072;
+    local-gemma4-e2b = 131072;
+    local-gemma4-e4b = 131072;
+    local-gemma4-12b = 262144;
+  };
+  contextForModel =
+    model:
+    let
+      localName = lib.removeSuffix ":latest" (lib.removePrefix "nix-local/" model);
+    in
+    modelContexts.${localName};
   modelfile =
     name: source:
     pkgs.writeText "${name}.Modelfile" ''
       FROM ${source}
-      PARAMETER num_ctx ${toString cfg.contextLength}
+      PARAMETER num_ctx ${toString modelContexts.${name}}
       PARAMETER num_predict ${toString cfg.maxTokens}
       PARAMETER temperature 0.7
       PARAMETER top_p 0.8
@@ -41,7 +58,7 @@ let
         default = model;
         base_url = "${endpoint}/v1";
         api_key = "ollama";
-        context_length = cfg.contextLength;
+        context_length = contextForModel model;
       };
       agent = {
         max_turns = 12;
@@ -97,7 +114,7 @@ let
       ] (name: {
         inherit name;
         limit = {
-          context = cfg.contextLength;
+          context = contextForModel name;
           output = cfg.maxTokens;
         };
       });
@@ -172,7 +189,8 @@ in
     enable = lib.mkEnableOption "Alpaca and bounded local AI for a 12 GiB AMD GPU";
     contextLength = lib.mkOption {
       type = lib.types.ints.positive;
-      default = 16384;
+      default = 262144;
+      description = "Maximum Ollama fallback context. Configured local model aliases use their native per-model context windows.";
     };
     maxTokens = lib.mkOption {
       type = lib.types.ints.positive;
@@ -186,8 +204,8 @@ in
   config = lib.mkIf cfg.enable {
     assertions = [
       {
-        assertion = cfg.maxTokens < cfg.contextLength;
-        message = "nix-ai-setup: maxTokens must be smaller than contextLength.";
+        assertion = cfg.maxTokens < lib.foldl' lib.min 262144 (builtins.attrValues modelContexts);
+        message = "nix-ai-setup: maxTokens must be smaller than the smallest configured model context window.";
       }
     ];
     hardware.graphics.enable = true;
