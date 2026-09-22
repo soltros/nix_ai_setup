@@ -73,6 +73,42 @@ let
     '';
   installModel =
     name: source: "ollama pull ${source} && ollama create ${name} -f ${modelfile name source}";
+  ollamaSyncContexts = pkgs.writeShellApplication {
+    name = "ollama-sync-contexts";
+    runtimeInputs = [ pkgs.ollama-vulkan ];
+    text = ''
+      set -euo pipefail
+
+      sync_one() {
+        local name="$1"
+        local source="$2"
+        local modelfile="$3"
+        local context="$4"
+
+        if ollama show "$name:latest" >/dev/null 2>&1; then
+          echo "Retuning $name:latest to runtime context $context..."
+          ollama pull "$source"
+          ollama create "$name" -f "$modelfile"
+        else
+          echo "Skipping $name:latest (not installed)"
+        fi
+      }
+
+      sync_one local-coder qwen3.5:9b ${modelfile "local-coder" aliases.local-coder} 65536
+      sync_one local-fast qwen3.5:4b ${modelfile "local-fast" aliases.local-fast} 65536
+      sync_one local-deepseek-coder deepseek-coder-v2:16b ${modelfile "local-deepseek-coder" aliases.local-deepseek-coder} 65536
+      sync_one local-qwen-coder qwen2.5-coder:14b ${modelfile "local-qwen-coder" aliases.local-qwen-coder} 32768
+      sync_one local-starcoder starcoder2:instruct ${modelfile "local-starcoder" aliases.local-starcoder} 16384
+      sync_one local-granite-code granite-code:8b ${modelfile "local-granite-code" aliases.local-granite-code} 65536
+      sync_one local-gemma4-e2b gemma4:e2b ${modelfile "local-gemma4-e2b" aliases.local-gemma4-e2b} 65536
+      sync_one local-gemma4-e4b gemma4:e4b ${modelfile "local-gemma4-e4b" aliases.local-gemma4-e4b} 65536
+      sync_one local-gemma4-12b gemma4:12b ${modelfile "local-gemma4-12b" aliases.local-gemma4-12b} 65536
+
+      echo
+      echo "Context synchronization complete."
+      echo "Load a model, then run: ollama ps"
+    '';
+  };
   hermesConfigFor =
     name: model: skin:
     (pkgs.formats.yaml { }).generate "${name}.yaml" {
@@ -272,6 +308,7 @@ EOF
     name = "hermes-setup";
     runtimeInputs = [
       pkgs.coreutils
+      ollamaSyncContexts
     ];
     text = ''
       set -euo pipefail
@@ -329,6 +366,10 @@ EOF
         echo "Hermes persona setup failed verification." >&2
         exit 1
       fi
+
+      echo
+      echo "Synchronizing installed Ollama aliases..."
+      ollama-sync-contexts
 
       echo
       echo "Hermes persona assets are ready."
@@ -474,6 +515,8 @@ ollama-get-gemma4-e2b
 ollama-get-gemma4-e4b
 ollama-get-gemma4-12b
 ollama-get-models           Install all configured models sequentially
+ollama-sync-contexts        Retune installed aliases to current runtime contexts
+ollama-sync-model-contexts  Alias for ollama-sync-contexts
 ollama list                 Show installed Ollama models
 ollama ps                   Show loaded model and GPU residency
 
@@ -547,6 +590,7 @@ in
       pkgs.opencode
       pkgs.libnotify
       nixai
+      ollamaSyncContexts
       hermesSetup
       hermesLocal
       (hermesDurandal "hermes-local-fast" "local-fast:latest")
@@ -576,6 +620,7 @@ in
     environment.etc."nix-ai-setup/opencode.json".source = openCodeConfig;
     programs.zsh.shellAliases = {
       hermes-setup-personas = "hermes-setup";
+      ollama-sync-model-contexts = "ollama-sync-contexts";
       hermes-coder = "hermes-local";
       hermes-fast = "hermes-local-fast";
       hermes-gemma4-e2b = "hermes-local-gemma4-e2b";
