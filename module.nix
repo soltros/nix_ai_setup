@@ -252,6 +252,66 @@ EOF
   hermesRasputin = name: model: hermesLauncher name model "rasputin" "rasputin-ikelos";
   hermesLocal = hermesDurandal "hermes-local" "local-coder:latest";
 
+  hermesSetup = pkgs.writeShellApplication {
+    name = "hermes-setup";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.systemd
+      pkgs.sudo
+    ];
+    text = ''
+      set -euo pipefail
+
+      if [ "''${EUID:-$(id -u)}" -ne 0 ]; then
+        exec sudo "$0" "$@"
+      fi
+
+      hermes_home=/var/lib/hermes/.hermes
+
+      echo "Materializing Hermes persona assets from installed tmpfiles rules..."
+      systemd-tmpfiles --create --prefix="$hermes_home"
+
+      required=(
+        "$hermes_home/SOUL.md"
+        "$hermes_home/personas/durandal/SOUL.md"
+        "$hermes_home/personas/guilty-spark/SOUL.md"
+        "$hermes_home/personas/rasputin/SOUL.md"
+        "$hermes_home/skins/durandal-marathon.yaml"
+        "$hermes_home/skins/guilty-spark-forerunner.yaml"
+        "$hermes_home/skins/rasputin-ikelos.yaml"
+      )
+
+      failed=0
+      echo
+      for path in "''${required[@]}"; do
+        if [ -r "$path" ]; then
+          printf '[ OK ] %s -> %s\n' "$path" "$(readlink -f "$path")"
+        else
+          printf '[FAIL] %s\n' "$path" >&2
+          failed=1
+        fi
+      done
+
+      if [ "$failed" -ne 0 ]; then
+        cat >&2 <<'EOF'
+
+Hermes persona setup is incomplete.
+The repair command is installed correctly, but the declarative persona tmpfiles
+rules are not present in the active NixOS generation.
+
+Update/rebuild the nixos-config generation containing
+modules/durandal-hermes-skin.nix, then run hermes-setup again.
+EOF
+        exit 1
+      fi
+
+      echo
+      echo "Hermes persona assets are ready."
+      echo "Try: spark"
+      echo "Try: rasputin"
+    '';
+  };
+
   nixai = pkgs.writeShellApplication {
     name = "nixai";
     text = ''
@@ -370,6 +430,10 @@ Durandal                    durandal-marathon
 343 Guilty Spark            guilty-spark-forerunner
 Rasputin                    rasputin-ikelos
 
+HERMES PERSONA SETUP
+hermes-setup                Materialize + verify Durandal/Spark/Rasputin assets
+hermes-setup-personas       Alias for hermes-setup
+
 COMPATIBILITY HELP ALIASES
 hermes-help                 nixai --help
 ollama-models               nixai --help
@@ -431,6 +495,7 @@ in
       pkgs.opencode
       pkgs.libnotify
       nixai
+      hermesSetup
       hermesLocal
       (hermesDurandal "hermes-local-fast" "local-fast:latest")
       (hermesDurandal "hermes-local-qwen-coder" "local-qwen-coder:latest")
@@ -461,6 +526,7 @@ in
     environment.etc."nix-ai-setup/hermes.yaml".source = hermesConfig;
     environment.etc."nix-ai-setup/opencode.json".source = openCodeConfig;
     programs.zsh.shellAliases = {
+      hermes-setup-personas = "hermes-setup";
       hermes-coder = "hermes-local";
       hermes-fast = "hermes-local-fast";
       hermes-qwen-coder = "hermes-local-qwen-coder";
