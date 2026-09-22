@@ -138,7 +138,7 @@ Every generated local OpenCode launcher enables the following OpenCode 1.x-compa
 
 OpenCode downloads published plugin packages automatically on first startup.
 
-The module installs `libnotify` for Linux desktop notifications.
+The module installs `libnotify` for Linux desktop notifications. For OpenCode 1 TUI integration, the launcher also seeds `~/.config/opencode/tui.json` with the Goal and DCP packages when that file does not already exist; an existing TUI config is preserved untouched.
 
 This repository currently targets the OpenCode 1.x build used on the configured system. OpenCode v2-only TUI plugins such as `@kitlangton/opencode-session-recap` and `@kitlangton/opencode-pr-tracker` are intentionally not enabled by default until the setup migrates to OpenCode v2.
 For `opencode-mem`, the launcher seeds `~/.config/opencode/opencode-mem.jsonc` only when that file does not already exist, so later user customization is preserved. The default configuration keeps memory local at `~/.opencode-mem/data`, binds the web UI to `127.0.0.1:4747`, enables auto-capture, and uses the local `nix-local` provider with `opencodeModel = "inherit"` so capture follows the active tool-capable OpenCode model. Manual memory operations remain available even if automatic capture cannot produce structured output.
