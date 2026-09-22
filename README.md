@@ -64,7 +64,7 @@ The aliases first pull the upstream model and then create the tuned local alias 
 
 **Hermes Desktop / another Hermes profile:** select a custom OpenAI-compatible provider with the settings below. `/etc/nix-ai-setup/hermes.yaml` contains the complete example, including `agent.max_turns = 12`. Selecting just the endpoint does not apply the profile's step limit.
 
-**OpenCode:** installed by this module. Run `opencode-local` for Qwen3.5 9B, `opencode-local-fast` for Qwen3.5 4B, `opencode-local-deepseek` for DeepSeek Coder V2 16B, `opencode-local-qwen-coder` for Qwen2.5-Coder 14B, `opencode-local-starcoder` for StarCoder2 Instruct, or `opencode-local-granite` for Granite Code 8B. Both commands force the bounded local provider even when a repository contains its own OpenCode configuration, cap build/plan agents at 12 steps, disable task delegation, disable sharing, and leave automatic package updates to Nix. Normal `opencode` retains your normal configuration and providers.
+**OpenCode:** installed by this module. Run `opencode-local` for Qwen3.5 9B, `opencode-local-fast` for Qwen3.5 4B, `opencode-local-deepseek` for DeepSeek Coder V2 16B, `opencode-local-qwen-coder` for Qwen2.5-Coder 14B, `opencode-local-starcoder` for StarCoder2 Instruct, or `opencode-local-granite` for Granite Code 8B. All six launchers force the bounded local provider even when a repository contains its own OpenCode configuration, cap build/plan agents at 12 steps, disable task delegation, disable sharing, and leave automatic package updates to Nix. Normal `opencode` retains your normal configuration and providers.
 
 For a one-shot task, use either launcher exactly like regular OpenCode:
 
