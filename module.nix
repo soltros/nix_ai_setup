@@ -256,7 +256,6 @@ EOF
     name = "hermes-setup";
     runtimeInputs = [
       pkgs.coreutils
-      pkgs.systemd
     ];
     text = ''
       set -euo pipefail
@@ -267,14 +266,27 @@ EOF
 
       hermes_home=/var/lib/hermes/.hermes
 
-      echo "Materializing Hermes persona assets from installed tmpfiles rules..."
-      # Restrict tmpfiles processing to the persona assets we own. Do not scan
-      # the entire Hermes state directory, which may legitimately contain
-      # user-owned files such as auth.json.
-      systemd-tmpfiles --create \
-        --prefix="$hermes_home/personas" \
-        --prefix="$hermes_home/skins" \
-        --prefix="$hermes_home/SOUL.md"
+      echo "Installing Hermes persona assets..."
+
+      install -d -m 2770 -o hermes -g hermes "$hermes_home"
+      install -d -m 2770 -o hermes -g hermes "$hermes_home/personas"
+      install -d -m 2770 -o hermes -g hermes "$hermes_home/personas/durandal"
+      install -d -m 2770 -o hermes -g hermes "$hermes_home/personas/guilty-spark"
+      install -d -m 2770 -o hermes -g hermes "$hermes_home/personas/rasputin"
+      install -d -m 2770 -o hermes -g hermes "$hermes_home/skins"
+
+      install -m 0644 -o hermes -g hermes ${./personas/durandal/SOUL.md} "$hermes_home/personas/durandal/SOUL.md"
+      install -m 0644 -o hermes -g hermes ${./personas/guilty-spark/SOUL.md} "$hermes_home/personas/guilty-spark/SOUL.md"
+      install -m 0644 -o hermes -g hermes ${./personas/rasputin/SOUL.md} "$hermes_home/personas/rasputin/SOUL.md"
+
+      install -m 0644 -o hermes -g hermes ${./skins/durandal-marathon.yaml} "$hermes_home/skins/durandal-marathon.yaml"
+      install -m 0644 -o hermes -g hermes ${./skins/guilty-spark-forerunner.yaml} "$hermes_home/skins/guilty-spark-forerunner.yaml"
+      install -m 0644 -o hermes -g hermes ${./skins/rasputin-ikelos.yaml} "$hermes_home/skins/rasputin-ikelos.yaml"
+
+      # Normal Hermes uses Durandal by default.
+      cp -f "$hermes_home/personas/durandal/SOUL.md" "$hermes_home/SOUL.md"
+      chown hermes:hermes "$hermes_home/SOUL.md"
+      chmod 0644 "$hermes_home/SOUL.md"
 
       required=(
         "$hermes_home/SOUL.md"
@@ -290,7 +302,7 @@ EOF
       echo
       for path in "''${required[@]}"; do
         if [ -r "$path" ]; then
-          printf '[ OK ] %s -> %s\n' "$path" "$(readlink -f "$path")"
+          printf '[ OK ] %s\n' "$path"
         else
           printf '[FAIL] %s\n' "$path" >&2
           failed=1
@@ -298,20 +310,13 @@ EOF
       done
 
       if [ "$failed" -ne 0 ]; then
-        cat >&2 <<'EOF'
-
-Hermes persona setup is incomplete.
-The repair command is installed correctly, but the declarative persona tmpfiles
-rules are not present in the active NixOS generation.
-
-Update/rebuild the nixos-config generation containing
-modules/durandal-hermes-skin.nix, then run hermes-setup again.
-EOF
+        echo "Hermes persona setup failed verification." >&2
         exit 1
       fi
 
       echo
       echo "Hermes persona assets are ready."
+      echo "Default persona: Durandal"
       echo "Try: spark"
       echo "Try: rasputin"
     '';
