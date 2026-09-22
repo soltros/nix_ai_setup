@@ -2,6 +2,8 @@
 
 NixOS flake module providing Nixpkgs **Alpaca**, Vulkan-accelerated **Ollama**, and a bounded local endpoint for **Hermes**, **OpenCode**, and other OpenAI-compatible coding tools.
 
+> **Ubuntu / NVIDIA edition:** a standalone Ubuntu setup for a 12 GB RTX 3060 is available in [`ubuntu/`](./ubuntu/README.md). It provides the same model set, native per-model context configuration, bounded gateway, Bash aliases, Hermes/OpenCode launchers, and Durandal / 343 Guilty Spark / Rasputin personas without requiring Nix.
+
 ## Hardware and model choice
 
 Prepared for a Ryzen 5 5600X (6 cores / 12 threads), 32 GB RAM, and a **12 GiB AMD Navi 22 GPU**. PCI device `1002:73df`, subsystem `148c:2410`; the exact retail card name was not established. Vulkan avoids depending on an unsupported ROCm GPU override.
