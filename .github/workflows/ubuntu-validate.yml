@@ -1,0 +1,40 @@
+name: Validate Ubuntu setup
+
+on:
+  push:
+    paths:
+      - "ubuntu/**"
+      - ".github/workflows/ubuntu-validate.yml"
+  pull_request:
+    paths:
+      - "ubuntu/**"
+      - ".github/workflows/ubuntu-validate.yml"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install validation dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck python3-aiohttp
+
+      - name: Bash syntax
+        run: |
+          bash -n             ubuntu/install.sh             ubuntu/uninstall.sh             ubuntu/bash_aliases.sh             ubuntu/lib/models.sh             ubuntu/bin/ubuntu-ai-model             ubuntu/bin/ubuntu-ai-help             ubuntu/bin/ubuntu-ai-diagnose             ubuntu/bin/hermes-ubuntu             ubuntu/bin/opencode-ubuntu
+
+      - name: ShellCheck
+        run: |
+          shellcheck             ubuntu/install.sh             ubuntu/uninstall.sh             ubuntu/bash_aliases.sh             ubuntu/lib/models.sh             ubuntu/bin/ubuntu-ai-model             ubuntu/bin/ubuntu-ai-help             ubuntu/bin/ubuntu-ai-diagnose             ubuntu/bin/hermes-ubuntu             ubuntu/bin/opencode-ubuntu
+
+      - name: Python syntax
+        run: |
+          python3 -m py_compile             ubuntu/gateway.py             ubuntu/test_gateway.py             ubuntu/smoke.py
+
+      - name: Gateway unit tests
+        working-directory: ubuntu
+        run: python3 -m unittest -v test_gateway.py
