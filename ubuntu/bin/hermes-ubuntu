@@ -5,7 +5,7 @@ ROOT="${UBUNTU_AI_ROOT:-/opt/ubuntu-ai}"
 source "$ROOT/lib/models.sh"
 
 persona="${1:-durandal}"
-model="${2:-local-gemma4-12b}"
+model="${2:-local-coder}"
 shift $(( $# >= 1 ? 1 : 0 ))
 shift $(( $# >= 1 ? 1 : 0 ))
 
