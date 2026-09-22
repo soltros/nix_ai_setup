@@ -34,7 +34,7 @@ let
   installModel =
     name: source: "ollama pull ${source} && ollama create ${name} -f ${modelfile name source}";
   hermesConfigFor =
-    name: model:
+    name: model: skin:
     (pkgs.formats.yaml { }).generate "${name}.yaml" {
       model = {
         provider = "custom";
@@ -64,9 +64,9 @@ let
         provider = "main";
       });
       fallback_providers = [ ];
-      display.skin = "durandal-marathon";
+      display.skin = skin;
     };
-  hermesConfig = hermesConfigFor "hermes-local" "local-coder:latest";
+  hermesConfig = hermesConfigFor "hermes-local" "local-coder:latest" "durandal-marathon";
   openCodeConfigFor = model: {
     "$schema" = "https://opencode.ai/config.json";
     inherit model;
@@ -128,21 +128,21 @@ let
       exec ${lib.getExe pkgs.opencode} "$@"
     '';
   hermesLauncher =
-    name: model:
+    name: model: persona: skin:
     let
-      runtimeConfig = hermesConfigFor name model;
+      runtimeConfig = hermesConfigFor name model skin;
     in
     pkgs.writeShellApplication {
       inherit name;
       runtimeInputs = [ pkgs.coreutils ];
       text = ''
-        durandal_home=/var/lib/hermes/.hermes
-        durandal_soul="$durandal_home/SOUL.md"
-        durandal_skin="$durandal_home/skins/durandal-marathon.yaml"
+        hermes_system_home=/var/lib/hermes/.hermes
+        persona_soul="$hermes_system_home/personas/${persona}/SOUL.md"
+        persona_skin="$hermes_system_home/skins/${skin}.yaml"
 
-        if [ ! -r "$durandal_soul" ] || [ ! -r "$durandal_skin" ]; then
-          echo "nix-ai-setup: Durandal Hermes assets are missing." >&2
-          echo "Expected SOUL.md and durandal-marathon.yaml from modules/durandal-hermes-skin.nix." >&2
+        if [ ! -r "$persona_soul" ] || [ ! -r "$persona_skin" ]; then
+          echo "nix-ai-setup: Hermes persona assets are missing for ${persona}." >&2
+          echo "Expected $persona_soul and $persona_skin from modules/durandal-hermes-skin.nix." >&2
           exit 1
         fi
 
@@ -151,11 +151,9 @@ let
         cp ${runtimeConfig} "$HERMES_HOME/config.yaml"
         chmod 600 "$HERMES_HOME/config.yaml"
 
-        # The nixos-config Durandal module is the sole authority for personality
-        # and terminal skin. Never copy these files: symlink the live declarative
-        # artifacts so every local-model launcher always uses the same SOUL/skin.
-        ln -sfn "$durandal_soul" "$HERMES_HOME/SOUL.md"
-        ln -sfn "$durandal_skin" "$HERMES_HOME/skins/durandal-marathon.yaml"
+        # Persona assets remain declaratively owned by nixos-config.
+        ln -sfn "$persona_soul" "$HERMES_HOME/SOUL.md"
+        ln -sfn "$persona_skin" "$HERMES_HOME/skins/${skin}.yaml"
 
         export OPENAI_API_KEY=ollama
         export OPENAI_BASE_URL=${endpoint}/v1
@@ -164,7 +162,10 @@ let
         exec hermes "$@"
       '';
     };
-  hermesLocal = hermesLauncher "hermes-local" "local-coder:latest";
+  hermesDurandal = name: model: hermesLauncher name model "durandal" "durandal-marathon";
+  hermesSpark = name: model: hermesLauncher name model "guilty-spark" "guilty-spark-forerunner";
+  hermesRasputin = name: model: hermesLauncher name model "rasputin" "rasputin-ikelos";
+  hermesLocal = hermesDurandal "hermes-local" "local-coder:latest";
 in
 {
   options.services.nix-ai-setup = {
@@ -212,14 +213,34 @@ in
       pkgs.alpaca
       pkgs.opencode
       hermesLocal
-      (hermesLauncher "hermes-local-fast" "local-fast:latest")
-      (hermesLauncher "hermes-local-deepseek" "local-deepseek-coder:latest")
-      (hermesLauncher "hermes-local-qwen-coder" "local-qwen-coder:latest")
-      (hermesLauncher "hermes-local-starcoder" "local-starcoder:latest")
-      (hermesLauncher "hermes-local-granite" "local-granite-code:latest")
-      (hermesLauncher "hermes-local-gemma4-e2b" "local-gemma4-e2b:latest")
-      (hermesLauncher "hermes-local-gemma4-e4b" "local-gemma4-e4b:latest")
-      (hermesLauncher "hermes-local-gemma4-12b" "local-gemma4-12b:latest")
+      (hermesDurandal "hermes-local-fast" "local-fast:latest")
+      (hermesDurandal "hermes-local-deepseek" "local-deepseek-coder:latest")
+      (hermesDurandal "hermes-local-qwen-coder" "local-qwen-coder:latest")
+      (hermesDurandal "hermes-local-starcoder" "local-starcoder:latest")
+      (hermesDurandal "hermes-local-granite" "local-granite-code:latest")
+      (hermesDurandal "hermes-local-gemma4-e2b" "local-gemma4-e2b:latest")
+      (hermesDurandal "hermes-local-gemma4-e4b" "local-gemma4-e4b:latest")
+      (hermesDurandal "hermes-local-gemma4-12b" "local-gemma4-12b:latest")
+
+      (hermesSpark "hermes-guilty-spark" "local-coder:latest")
+      (hermesSpark "hermes-guilty-spark-fast" "local-fast:latest")
+      (hermesSpark "hermes-guilty-spark-deepseek" "local-deepseek-coder:latest")
+      (hermesSpark "hermes-guilty-spark-qwen-coder" "local-qwen-coder:latest")
+      (hermesSpark "hermes-guilty-spark-starcoder" "local-starcoder:latest")
+      (hermesSpark "hermes-guilty-spark-granite" "local-granite-code:latest")
+      (hermesSpark "hermes-guilty-spark-gemma4-e2b" "local-gemma4-e2b:latest")
+      (hermesSpark "hermes-guilty-spark-gemma4-e4b" "local-gemma4-e4b:latest")
+      (hermesSpark "hermes-guilty-spark-gemma4-12b" "local-gemma4-12b:latest")
+
+      (hermesRasputin "hermes-rasputin" "local-coder:latest")
+      (hermesRasputin "hermes-rasputin-fast" "local-fast:latest")
+      (hermesRasputin "hermes-rasputin-deepseek" "local-deepseek-coder:latest")
+      (hermesRasputin "hermes-rasputin-qwen-coder" "local-qwen-coder:latest")
+      (hermesRasputin "hermes-rasputin-starcoder" "local-starcoder:latest")
+      (hermesRasputin "hermes-rasputin-granite" "local-granite-code:latest")
+      (hermesRasputin "hermes-rasputin-gemma4-e2b" "local-gemma4-e2b:latest")
+      (hermesRasputin "hermes-rasputin-gemma4-e4b" "local-gemma4-e4b:latest")
+      (hermesRasputin "hermes-rasputin-gemma4-12b" "local-gemma4-12b:latest")
       (openCodeLauncher "opencode-local" "nix-local/local-coder:latest")
       (openCodeLauncher "opencode-local-fast" "nix-local/local-fast:latest")
       (openCodeLauncher "opencode-local-deepseek" "nix-local/local-deepseek-coder:latest")
@@ -242,6 +263,26 @@ in
       hermes-gemma4-e2b = "hermes-local-gemma4-e2b";
       hermes-gemma4-e4b = "hermes-local-gemma4-e4b";
       hermes-gemma4-12b = "hermes-local-gemma4-12b";
+
+      spark = "hermes-guilty-spark";
+      spark-fast = "hermes-guilty-spark-fast";
+      spark-deepseek = "hermes-guilty-spark-deepseek";
+      spark-qwen-coder = "hermes-guilty-spark-qwen-coder";
+      spark-starcoder = "hermes-guilty-spark-starcoder";
+      spark-granite = "hermes-guilty-spark-granite";
+      spark-gemma4-e2b = "hermes-guilty-spark-gemma4-e2b";
+      spark-gemma4-e4b = "hermes-guilty-spark-gemma4-e4b";
+      spark-gemma4-12b = "hermes-guilty-spark-gemma4-12b";
+
+      rasputin = "hermes-rasputin";
+      rasputin-fast = "hermes-rasputin-fast";
+      rasputin-deepseek = "hermes-rasputin-deepseek";
+      rasputin-qwen-coder = "hermes-rasputin-qwen-coder";
+      rasputin-starcoder = "hermes-rasputin-starcoder";
+      rasputin-granite = "hermes-rasputin-granite";
+      rasputin-gemma4-e2b = "hermes-rasputin-gemma4-e2b";
+      rasputin-gemma4-e4b = "hermes-rasputin-gemma4-e4b";
+      rasputin-gemma4-12b = "hermes-rasputin-gemma4-12b";
       ollama-models = ''printf '%s\n' "Model alias                     Source                    Role" "local-coder:latest              qwen3.5:9b                Default for focused coding and tool use; approximately 6.6 GB weights" "local-fast:latest               qwen3.5:4b                Faster small tasks and a fallback if 9B is too slow" "local-deepseek-coder:latest     deepseek-coder-v2:16b     Larger coding-focused MoE model; about 8.9 GB" "local-qwen-coder:latest         qwen2.5-coder:14b         Dedicated code model for refactoring, explanation, and generation; about 9.0 GB" "local-starcoder:latest          starcoder2:instruct       Instruct-tuned StarCoder2 for interactive programming; about 9.1 GB" "local-granite-code:latest       granite-code:8b           Lightweight IBM code model; about 4.6 GB" "local-gemma4-e2b:latest         gemma4:e2b                Compact Gemma 4 variant; about 7.2 GB" "local-gemma4-e4b:latest         gemma4:e4b                Mid-size Gemma 4 variant; about 9.6 GB" "local-gemma4-12b:latest         gemma4:12b                Dense Gemma 4 12B model; about 7.6 GB"'';
       ollama-get-coder = installModel "local-coder" aliases.local-coder;
       ollama-get-fast = installModel "local-fast" aliases.local-fast;
