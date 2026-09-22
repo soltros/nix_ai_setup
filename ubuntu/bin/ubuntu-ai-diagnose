@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -u
+
+ok=0
+fail=0
+check() {
+  local label="$1"; shift
+  if "$@" >/tmp/ubuntu-ai-check.out 2>/tmp/ubuntu-ai-check.err; then
+    printf '[ OK ] %s\n' "$label"
+    ok=$((ok+1))
+  else
+    printf '[FAIL] %s\n' "$label"
+    sed -n '1,3p' /tmp/ubuntu-ai-check.err 2>/dev/null || true
+    fail=$((fail+1))
+  fi
+}
+
+echo "== NVIDIA =="
+if command -v nvidia-smi >/dev/null 2>&1; then
+  nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader
+else
+  echo "nvidia-smi not found"
+  fail=$((fail+1))
+fi
+
+echo
+echo "== Services =="
+check "ollama.service active" systemctl is-active --quiet ollama
+check "ubuntu-ai-gateway.service active" systemctl is-active --quiet ubuntu-ai-gateway
+check "Ollama API reachable" curl -fsS http://127.0.0.1:11434/api/version
+check "Bounded gateway reachable" curl -fsS http://127.0.0.1:11435/api/version
+
+echo
+echo "== Commands =="
+for cmd in ollama hermes opencode ubuntu-ai-model hermes-ubuntu opencode-ubuntu; do
+  if command -v "$cmd" >/dev/null 2>&1; then
+    printf '[ OK ] %s -> %s\n' "$cmd" "$(command -v "$cmd")"
+    ok=$((ok+1))
+  else
+    printf '[FAIL] %s not found\n' "$cmd"
+    fail=$((fail+1))
+  fi
+done
+
+echo
+echo "== Ollama models =="
+ollama list 2>/dev/null || true
+
+echo
+echo "== Loaded model / GPU residency =="
+ollama ps 2>/dev/null || true
+
+echo
+printf 'Checks passed: %d  failed: %d\n' "$ok" "$fail"
+(( fail == 0 ))
