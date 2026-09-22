@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="${UBUNTU_AI_ROOT:-/opt/ubuntu-ai}"
+# shellcheck source=/dev/null
+source "$ROOT/lib/models.sh"
+
+printf '%s\n' "MODEL ALIASES"
+printf '%-30s %-25s %-10s %s\n' "Model alias" "Source" "Context" "Role"
+for row in "${UBUNTU_AI_MODELS[@]}"; do
+  IFS='|' read -r alias source context role <<<"$row"
+  printf '%-30s %-25s %-10s %s\n' "$alias:latest" "$source" "$context" "$role"
+done
+
+cat <<'EOF'
+
+HERMES PERSONAS
+Persona            Default alias     Skin
+Durandal           hermes-coder      durandal-marathon
+343 Guilty Spark   spark             guilty-spark-forerunner
+Rasputin           rasputin          rasputin-ikelos
+
+DURANDAL MODEL ALIASES
+hermes-coder  hermes-fast  hermes-deepseek  hermes-qwen-coder  hermes-starcoder
+hermes-granite  hermes-gemma4-e2b  hermes-gemma4-e4b  hermes-gemma4-12b
+
+GUILTY SPARK MODEL ALIASES
+spark  spark-fast  spark-deepseek  spark-qwen-coder  spark-starcoder
+spark-granite  spark-gemma4-e2b  spark-gemma4-e4b  spark-gemma4-12b
+
+RASPUTIN MODEL ALIASES
+rasputin  rasputin-fast  rasputin-deepseek  rasputin-qwen-coder  rasputin-starcoder
+rasputin-granite  rasputin-gemma4-e2b  rasputin-gemma4-e4b  rasputin-gemma4-12b
+
+OPENCODE
+opencode-local  opencode-local-fast  opencode-local-deepseek
+opencode-local-qwen-coder  opencode-local-starcoder  opencode-local-granite
+opencode-local-gemma4-e2b  opencode-local-gemma4-e4b  opencode-local-gemma4-12b
+
+MODEL MANAGEMENT
+ollama-get-coder  ollama-get-fast  ollama-get-deepseek-coder
+ollama-get-qwen-coder  ollama-get-starcoder  ollama-get-granite-code
+ollama-get-gemma4-e2b  ollama-get-gemma4-e4b  ollama-get-gemma4-12b
+ollama-get-models
+EOF
