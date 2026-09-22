@@ -1,3 +1,6 @@
+# Ensure user-installed Hermes/OpenCode launchers are visible.
+export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"
+
 # shellcheck shell=bash
 # Bash command layer for the standalone Ubuntu AI setup.
 
