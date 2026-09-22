@@ -144,7 +144,7 @@ OLLAMA_NO_CLOUD=1
 
 The model aliases define explicit runtime context windows. Hermes-capable models are tuned to 65,536 tokens on this 12 GB setup.
 
-This is important for Hermes: `context_length` and `ollama_num_ctx` both match the tuned Ollama runtime context.
+This is important for Hermes: `context_length` and `ollama_num_ctx` both match the tuned Ollama runtime context. Hermes also uses a 16,384-token output budget so Gemma 4 has enough room to produce visible content instead of exhausting a smaller completion budget internally.
 
 ## Models
 
