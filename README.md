@@ -57,7 +57,8 @@ ollama-get-gemma4-e2b       # Gemma 4 E2B
 ollama-get-gemma4-e4b       # Gemma 4 E4B
 ollama-get-gemma4-12b       # Gemma 4 12B
 ollama-get-models           # install every configured model, sequentially
-ollama-models               # print the configured model alias/source/role table
+ollama-models               # print models, personas, and Hermes aliases
+hermes-help                 # same help output as ollama-models
 ollama list
 ```
 
@@ -114,6 +115,15 @@ rasputin-gemma4-12b
 ```
 
 Every launcher is fail-closed: it requires the selected persona's declarative `SOUL.md` and skin under `/var/lib/hermes/.hermes/personas/` and `/var/lib/hermes/.hermes/skins/`. The launcher symlinks those exact generated assets into its runtime home and sets the matching `display.skin`. Durandal remains the system-wide default for normal Hermes.
+
+For a compact terminal reference, run either:
+
+```sh
+ollama-models
+hermes-help
+```
+
+That help output shows the full model alias/source/role table, the three available personas and their skins, and the complete Durandal, Guilty Spark, and Rasputin launcher aliases.
 
 **Hermes Desktop / another Hermes profile:** select a custom OpenAI-compatible provider with the settings below. `/etc/nix-ai-setup/hermes.yaml` contains the complete example, including `agent.max_turns = 12`. Selecting just the endpoint does not apply the profile's step limit.
 
