@@ -14,12 +14,44 @@ model_exists "$model" || { echo "Unknown model alias: $model" >&2; exit 2; }
 }
 context="$(model_field "$model" context)"
 
+mem_config="${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode-mem.jsonc"
+if [[ ! -e "$mem_config" ]]; then
+  mkdir -p "$(dirname "$mem_config")"
+  cat >"$mem_config" <<'EOF'
+{
+  "storagePath": "~/.opencode-mem/data",
+  "webServerEnabled": true,
+  "webServerHost": "127.0.0.1",
+  "webServerPort": 4747,
+  "autoCaptureEnabled": true,
+  "opencodeProvider": "ubuntu-local",
+  "opencodeModel": "inherit",
+  "showAutoCaptureToasts": true,
+  "showUserProfileToasts": true,
+  "showErrorToasts": true,
+  "userProfileAnalysisInterval": 10,
+  "maxMemories": 10,
+  "compaction": {
+    "enabled": true,
+    "memoryLimit": 10
+  },
+  "chatMessage": {
+    "enabled": true,
+    "maxMemories": 3,
+    "excludeCurrentSession": true,
+    "injectOn": "first"
+  }
+}
+EOF
+fi
+
 export OPENCODE_CONFIG_CONTENT="$(cat <<EOF
 {
   "\$schema": "https://opencode.ai/config.json",
   "model": "ubuntu-local/$model:latest",
   "small_model": "ubuntu-local/local-fast:latest",
   "enabled_providers": ["ubuntu-local"],
+  "plugins": ["opencode-mem"],
   "autoupdate": false,
   "share": "disabled",
   "provider": {
