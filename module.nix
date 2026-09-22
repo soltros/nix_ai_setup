@@ -283,7 +283,37 @@ in
       rasputin-gemma4-e2b = "hermes-rasputin-gemma4-e2b";
       rasputin-gemma4-e4b = "hermes-rasputin-gemma4-e4b";
       rasputin-gemma4-12b = "hermes-rasputin-gemma4-12b";
-      ollama-models = ''printf '%s\n' "Model alias                     Source                    Role" "local-coder:latest              qwen3.5:9b                Default for focused coding and tool use; approximately 6.6 GB weights" "local-fast:latest               qwen3.5:4b                Faster small tasks and a fallback if 9B is too slow" "local-deepseek-coder:latest     deepseek-coder-v2:16b     Larger coding-focused MoE model; about 8.9 GB" "local-qwen-coder:latest         qwen2.5-coder:14b         Dedicated code model for refactoring, explanation, and generation; about 9.0 GB" "local-starcoder:latest          starcoder2:instruct       Instruct-tuned StarCoder2 for interactive programming; about 9.1 GB" "local-granite-code:latest       granite-code:8b           Lightweight IBM code model; about 4.6 GB" "local-gemma4-e2b:latest         gemma4:e2b                Compact Gemma 4 variant; about 7.2 GB" "local-gemma4-e4b:latest         gemma4:e4b                Mid-size Gemma 4 variant; about 9.6 GB" "local-gemma4-12b:latest         gemma4:12b                Dense Gemma 4 12B model; about 7.6 GB"'';
+      ollama-models = ''printf '%s\n' \
+        "MODEL ALIASES" \
+        "Model alias                     Source                    Role" \
+        "local-coder:latest              qwen3.5:9b                Default for focused coding and tool use; approximately 6.6 GB weights" \
+        "local-fast:latest               qwen3.5:4b                Faster small tasks and a fallback if 9B is too slow" \
+        "local-deepseek-coder:latest     deepseek-coder-v2:16b     Larger coding-focused MoE model; about 8.9 GB" \
+        "local-qwen-coder:latest         qwen2.5-coder:14b         Dedicated code model for refactoring, explanation, and generation; about 9.0 GB" \
+        "local-starcoder:latest          starcoder2:instruct       Instruct-tuned StarCoder2 for interactive programming; about 9.1 GB" \
+        "local-granite-code:latest       granite-code:8b           Lightweight IBM code model; about 4.6 GB" \
+        "local-gemma4-e2b:latest         gemma4:e2b                Compact Gemma 4 variant; about 7.2 GB" \
+        "local-gemma4-e4b:latest         gemma4:e4b                Mid-size Gemma 4 variant; about 9.6 GB" \
+        "local-gemma4-12b:latest         gemma4:12b                Dense Gemma 4 12B model; about 7.6 GB" \
+        "" \
+        "HERMES PERSONAS" \
+        "Persona            Default alias     Skin" \
+        "Durandal           hermes-coder      durandal-marathon" \
+        "343 Guilty Spark   spark             guilty-spark-forerunner" \
+        "Rasputin           rasputin          rasputin-ikelos" \
+        "" \
+        "DURANDAL MODEL ALIASES" \
+        "hermes-coder  hermes-fast  hermes-deepseek  hermes-qwen-coder  hermes-starcoder" \
+        "hermes-granite  hermes-gemma4-e2b  hermes-gemma4-e4b  hermes-gemma4-12b" \
+        "" \
+        "GUILTY SPARK MODEL ALIASES" \
+        "spark  spark-fast  spark-deepseek  spark-qwen-coder  spark-starcoder" \
+        "spark-granite  spark-gemma4-e2b  spark-gemma4-e4b  spark-gemma4-12b" \
+        "" \
+        "RASPUTIN MODEL ALIASES" \
+        "rasputin  rasputin-fast  rasputin-deepseek  rasputin-qwen-coder  rasputin-starcoder" \
+        "rasputin-granite  rasputin-gemma4-e2b  rasputin-gemma4-e4b  rasputin-gemma4-12b"'';
+      hermes-help = "ollama-models";
       ollama-get-coder = installModel "local-coder" aliases.local-coder;
       ollama-get-fast = installModel "local-fast" aliases.local-fast;
       ollama-get-deepseek-coder = installModel "local-deepseek-coder" aliases.local-deepseek-coder;
