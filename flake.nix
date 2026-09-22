@@ -21,6 +21,9 @@
           })
         ];
       };
+      openCodeLaunchers = builtins.filter (
+        package: nixpkgs.lib.hasPrefix "opencode-local" (nixpkgs.lib.getName package)
+      ) testSystem.config.environment.systemPackages;
     in
     {
       nixosModules.default = import ./module.nix;
@@ -34,6 +37,12 @@
         module = pkgs.writeText "nix-ai-module-check" (
           builtins.unsafeDiscardStringContext testSystem.config.system.build.toplevel.drvPath
         );
+        launchers =
+          assert builtins.length openCodeLaunchers == 2;
+          pkgs.symlinkJoin {
+            name = "nix-ai-opencode-launchers-check";
+            paths = openCodeLaunchers;
+          };
         gateway =
           pkgs.runCommand "nix-ai-gateway-tests"
             {

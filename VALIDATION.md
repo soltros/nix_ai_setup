@@ -8,6 +8,7 @@ Validated on 2026-09-21, before publishing the initial commit.
 - Extending the existing `b450m-d3sh` NixOS configuration with this module and enabling it evaluates its complete system derivation successfully. No existing configuration file was edited and no rebuild was activated.
 - Gateway tests cover native thinking suppression, OpenAI reasoning suppression, token-cap bypass attempts, smaller requested limits, tool payload preservation, streaming, HTTP timeouts, and refusal to forward model deletion.
 - OpenCode is installed from Nixpkgs and exposed through `opencode-local` (9B) and `opencode-local-fast` (4B); their inline configuration keeps project files from switching the dedicated local launchers to a cloud provider.
+- The flake check builds both OpenCode launchers so shell validation failures are caught before an update is published.
 - PCI/sysfs inspection confirms AMD Navi 22, 12 GiB VRAM; CPU/memory inspection confirms Ryzen 5 5600X and approximately 32 GB RAM.
 
 Not yet verified: GPU inference speed or residency, either model's coding quality on this hardware, real inference through the gateway, Alpaca GUI connection, or a complete Hermes/OpenCode coding task. The sandbox had no `/dev/dri` devices. A temporary model download was stopped before completion when the handoff was requested. No model weights are included in Git.
