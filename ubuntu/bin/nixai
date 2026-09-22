@@ -101,9 +101,10 @@ case "${1:---help}" in
     Fallback trigger           after Hermes exhausts invalid/empty-response retries
     Minimum required by Hermes 64000 tokens
     32K Qwen2.5-Coder          OpenCode/direct only; not exposed through Hermes
+    Gemma 4 Hermes status      optional only; current Ollama tool-call parsing can be unreliable
 
     HERMES — DURANDAL
-    durandal                   Gemma 4 12B (default)
+    durandal                   Qwen3.5 9B (default)
     durandal-fast              Qwen3.5 4B
     durandal-gemma4-e2b        Gemma 4 E2B
     durandal-gemma4-e4b        Gemma 4 E4B
@@ -117,14 +118,14 @@ case "${1:---help}" in
     hermes-gemma4-12b          Gemma 4 12B
     
     HERMES — 343 GUILTY SPARK
-    spark                      Gemma 4 12B (default)
+    spark                      Qwen3.5 9B (default)
     spark-fast                 Qwen3.5 4B
     spark-gemma4-e2b           Gemma 4 E2B
     spark-gemma4-e4b           Gemma 4 E4B
     spark-gemma4-12b           Gemma 4 12B
     
     HERMES — RASPUTIN
-    rasputin                   Gemma 4 12B (default)
+    rasputin                   Qwen3.5 9B (default)
     rasputin-fast              Qwen3.5 4B
     rasputin-gemma4-e2b        Gemma 4 E2B
     rasputin-gemma4-e4b        Gemma 4 E4B
