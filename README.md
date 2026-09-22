@@ -8,17 +8,17 @@ NixOS flake module providing Nixpkgs **Alpaca**, Vulkan-accelerated **Ollama**, 
 
 Prepared for a Ryzen 5 5600X (6 cores / 12 threads), 32 GB RAM, and a **12 GiB AMD Navi 22 GPU**. PCI device `1002:73df`, subsystem `148c:2410`; the exact retail card name was not established. Vulkan avoids depending on an unsupported ROCm GPU override.
 
-| Model alias | Source | Native context | Role |
-| --- | --- | ---: | --- |
-| `local-coder:latest` | `qwen3.5:9b` | 262,144 | Default for focused coding and tool use; approximately 6.6 GB weights |
-| `local-fast:latest` | `qwen3.5:4b` | 262,144 | Faster small tasks and a fallback if 9B is too slow |
-| `local-deepseek-coder:latest` | `deepseek-coder-v2:16b` | 163,840 | Larger coding-focused MoE model; about 8.9 GB |
-| `local-qwen-coder:latest` | `qwen2.5-coder:14b` | 32,768 | Dedicated code model for refactoring, explanation, and generation; about 9.0 GB |
-| `local-starcoder:latest` | `starcoder2:instruct` | 16,384 | Instruct-tuned StarCoder2 for interactive programming; about 9.1 GB |
-| `local-granite-code:latest` | `granite-code:8b` | 131,072 | Lightweight IBM code model; about 4.6 GB |
-| `local-gemma4-e2b:latest` | `gemma4:e2b` | 131,072 | Compact Gemma 4 variant; about 7.2 GB |
-| `local-gemma4-e4b:latest` | `gemma4:e4b` | 131,072 | Mid-size Gemma 4 variant; about 9.6 GB |
-| `local-gemma4-12b:latest` | `gemma4:12b` | 262,144 | Dense Gemma 4 12B model; about 7.6 GB |
+| Model alias | Source | Native context | Tools | Role |
+| --- | --- | ---: | :---: | --- |
+| `local-coder:latest` | `qwen3.5:9b` | 262,144 | yes | Default for focused coding and tool use; approximately 6.6 GB weights |
+| `local-fast:latest` | `qwen3.5:4b` | 262,144 | yes | Faster small tasks and a fallback if 9B is too slow |
+| `local-deepseek-coder:latest` | `deepseek-coder-v2:16b` | 163,840 | no | Larger coding-focused MoE model; about 8.9 GB |
+| `local-qwen-coder:latest` | `qwen2.5-coder:14b` | 32,768 | yes | Dedicated code model for refactoring, explanation, and generation; about 9.0 GB |
+| `local-starcoder:latest` | `starcoder2:instruct` | 16,384 | no | Instruct-tuned StarCoder2 for interactive programming; about 9.1 GB |
+| `local-granite-code:latest` | `granite-code:8b` | 131,072 | no | Lightweight IBM code model; about 4.6 GB |
+| `local-gemma4-e2b:latest` | `gemma4:e2b` | 131,072 | yes | Compact Gemma 4 variant; about 7.2 GB |
+| `local-gemma4-e4b:latest` | `gemma4:e4b` | 131,072 | yes | Mid-size Gemma 4 variant; about 9.6 GB |
+| `local-gemma4-12b:latest` | `gemma4:12b` | 262,144 | yes | Dense Gemma 4 12B model; about 7.6 GB |
 
 These are hardware-informed starting choices, **not benchmarked winners**. The complete set requires substantially more than 11 GB of disk space, although only one model is loaded into memory at a time. Each tuned Ollama alias now uses the model's own native context window, and Hermes/OpenCode are generated with that same value so clients do not accidentally clamp or misreport context. Q8 KV cache is still used to reduce runtime memory pressure. Actual GPU residency must be checked after activation. Larger 27B/30B models risk substantial CPU offload on this card; they are not included by default.
 
@@ -75,10 +75,7 @@ The aliases first pull the upstream model and then create the tuned local alias 
 ```sh
 hermes-coder
 hermes-fast
-hermes-deepseek
 hermes-qwen-coder
-hermes-starcoder
-hermes-granite
 hermes-gemma4-e2b
 hermes-gemma4-e4b
 hermes-gemma4-12b
@@ -94,23 +91,17 @@ Three declarative Hermes personas are available from `~/nixos-config/modules/dur
 | 343 Guilty Spark | `spark` / `hermes-guilty-spark` | `guilty-spark-forerunner` |
 | Rasputin | `rasputin` / `hermes-rasputin` | `rasputin-ikelos` |
 
-The alternate personas also have model-specific aliases matching the Durandal set:
+The alternate personas have model-specific aliases for models that advertise native tool calling in Ollama. DeepSeek Coder V2, StarCoder2, and Granite Code remain installed as direct coding/chat models but are intentionally excluded from Hermes/OpenCode agent launchers because those clients send tool schemas. Use `deepseek-chat`, `starcoder-chat`, or `granite-chat` for those models.
 
 ```sh
 spark-fast
-spark-deepseek
 spark-qwen-coder
-spark-starcoder
-spark-granite
 spark-gemma4-e2b
 spark-gemma4-e4b
 spark-gemma4-12b
 
 rasputin-fast
-rasputin-deepseek
 rasputin-qwen-coder
-rasputin-starcoder
-rasputin-granite
 rasputin-gemma4-e2b
 rasputin-gemma4-e4b
 rasputin-gemma4-12b
@@ -129,7 +120,7 @@ That help output shows the full model alias/source/role table, the three availab
 
 **Hermes Desktop / another Hermes profile:** select a custom OpenAI-compatible provider with the settings below. `/etc/nix-ai-setup/hermes.yaml` contains the complete example, including `agent.max_turns = 12`. Selecting just the endpoint does not apply the profile's step limit.
 
-**OpenCode:** installed by this module. Run `opencode-local` for Qwen3.5 9B, `opencode-local-fast` for Qwen3.5 4B, `opencode-local-deepseek` for DeepSeek Coder V2 16B, `opencode-local-qwen-coder` for Qwen2.5-Coder 14B, `opencode-local-starcoder` for StarCoder2 Instruct, `opencode-local-granite` for Granite Code 8B, `opencode-local-gemma4-e2b` for Gemma 4 E2B, `opencode-local-gemma4-e4b` for Gemma 4 E4B, or `opencode-local-gemma4-12b` for Gemma 4 12B. All nine launchers force the bounded local provider even when a repository contains its own OpenCode configuration, cap build/plan agents at 12 steps, disable task delegation, disable sharing, and leave automatic package updates to Nix. Normal `opencode` retains your normal configuration and providers.
+**OpenCode:** installed by this module. Agent launchers are provided only for tool-capable models: `opencode-local`, `opencode-local-fast`, `opencode-local-qwen-coder`, `opencode-local-gemma4-e2b`, `opencode-local-gemma4-e4b`, and `opencode-local-gemma4-12b`. All six launchers force the bounded local provider even when a repository contains its own OpenCode configuration, cap build/plan agents at 12 steps, disable task delegation, disable sharing, and leave automatic package updates to Nix. Normal `opencode` retains your normal configuration and providers.
 
 For a one-shot task, use either launcher exactly like regular OpenCode:
 
