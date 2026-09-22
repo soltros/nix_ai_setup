@@ -65,7 +65,7 @@ nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader
 echo
 echo "== Ubuntu dependencies =="
 sudo apt-get update
-sudo apt-get install -y curl git xz-utils ca-certificates python3 python3-aiohttp
+sudo apt-get install -y curl git gh libnotify-bin xz-utils ca-certificates python3 python3-aiohttp
 
 if (( WITH_ALPACA == 1 )); then
   sudo apt-get install -y flatpak
