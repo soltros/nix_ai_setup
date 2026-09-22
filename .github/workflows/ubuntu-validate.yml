@@ -25,15 +25,38 @@ jobs:
 
       - name: Bash syntax
         run: |
-          bash -n             ubuntu/install.sh             ubuntu/uninstall.sh             ubuntu/bash_aliases.sh             ubuntu/lib/models.sh             ubuntu/bin/ubuntu-ai-model             ubuntu/bin/ubuntu-ai-help             ubuntu/bin/ubuntu-ai-diagnose             ubuntu/bin/hermes-ubuntu             ubuntu/bin/opencode-ubuntu
+          bash -n \
+            ubuntu/install.sh \
+            ubuntu/uninstall.sh \
+            ubuntu/bash_aliases.sh \
+            ubuntu/lib/models.sh \
+            ubuntu/bin/nixai \
+            ubuntu/bin/ubuntu-ai-model \
+            ubuntu/bin/ubuntu-ai-help \
+            ubuntu/bin/ubuntu-ai-diagnose \
+            ubuntu/bin/hermes-ubuntu \
+            ubuntu/bin/opencode-ubuntu
 
       - name: ShellCheck
         run: |
-          shellcheck             ubuntu/install.sh             ubuntu/uninstall.sh             ubuntu/bash_aliases.sh             ubuntu/lib/models.sh             ubuntu/bin/ubuntu-ai-model             ubuntu/bin/ubuntu-ai-help             ubuntu/bin/ubuntu-ai-diagnose             ubuntu/bin/hermes-ubuntu             ubuntu/bin/opencode-ubuntu
+          shellcheck \
+            ubuntu/install.sh \
+            ubuntu/uninstall.sh \
+            ubuntu/bash_aliases.sh \
+            ubuntu/lib/models.sh \
+            ubuntu/bin/nixai \
+            ubuntu/bin/ubuntu-ai-model \
+            ubuntu/bin/ubuntu-ai-help \
+            ubuntu/bin/ubuntu-ai-diagnose \
+            ubuntu/bin/hermes-ubuntu \
+            ubuntu/bin/opencode-ubuntu
 
       - name: Python syntax
         run: |
-          python3 -m py_compile             ubuntu/gateway.py             ubuntu/test_gateway.py             ubuntu/smoke.py
+          python3 -m py_compile \
+            ubuntu/gateway.py \
+            ubuntu/test_gateway.py \
+            ubuntu/smoke.py
 
       - name: Gateway unit tests
         working-directory: ubuntu
