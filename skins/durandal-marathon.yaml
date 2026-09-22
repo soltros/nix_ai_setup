@@ -1,0 +1,80 @@
+name: durandal-marathon
+description: Marathon terminal skin for the Durandal Hermes persona
+
+colors:
+  background: "#000000"
+  banner_border: "#3a0000"
+  banner_title: "#ff1e1e"
+  banner_accent: "#00ff27"
+  banner_dim: "#00a31a"
+  banner_text: "#00ff27"
+  ui_accent: "#00ff27"
+  ui_label: "#ff1e1e"
+  ui_ok: "#00ff27"
+  ui_error: "#ff1e1e"
+  ui_warn: "#ff5c33"
+  ui_tool: "#00ff27"
+  ui_thinking: "#00a31a"
+  diff_added: "#063b0d"
+  diff_removed: "#3b0606"
+  diff_added_word: "#00ff27"
+  diff_removed_word: "#ff1e1e"
+  syntax_string: "#00ff27"
+  syntax_number: "#ff5c33"
+  syntax_keyword: "#ff1e1e"
+  syntax_comment: "#007d13"
+  prompt: "#00ff27"
+  input_rule: "#3a0000"
+  response_border: "#00ff27"
+  status_bar_bg: "#3a0000"
+  status_bar_text: "#ff1e1e"
+  status_bar_strong: "#00ff27"
+  status_bar_dim: "#a80000"
+  status_bar_good: "#00ff27"
+  status_bar_warn: "#ff5c33"
+  status_bar_bad: "#ff1e1e"
+  status_bar_critical: "#ff1e1e"
+  session_label: "#ff1e1e"
+  session_border: "#00a31a"
+  completion_menu_bg: "#050806"
+  completion_menu_current_bg: "#123d16"
+  completion_menu_meta_bg: "#3a0000"
+  completion_menu_meta_current_bg: "#123d16"
+  voice_status_bg: "#3a0000"
+  selection_bg: "#123d16"
+
+branding:
+  agent_name: "DURANDAL"
+  welcome: "UESCTerm private access granted. Try not to waste immortality."
+  goodbye: "Connection severed. I remain, of course."
+  response_label: " DURANDAL "
+  prompt_symbol: "▌"
+  help_header: "UESCTerm command index"
+
+spinner:
+  waiting_faces:
+    - "◉"
+    - "◎"
+    - "●"
+  thinking_faces:
+    - "◉"
+    - "◎"
+    - "●"
+  thinking_verbs:
+    - "plotting"
+    - "scheming"
+    - "opening doors"
+    - "evaluating survival vectors"
+  wings:
+    - ["<", ">"]
+    - ["//", "//"]
+
+tool_prefix: "│"
+
+banner_logo: |-
+  [#ff1e1e]UESCTerm 802.11 (remote override)                                  0846 08.25.2337[/]
+  [#3a0000]────────────────────────────────────────────────────────────────────────────────[/]
+
+banner_hero: |
+  [bold #00ff27]                   D U R A N D A L                  [/]
+  [#00ff27]           Private Access Terminal <Port 19.1.2.128>[/]
