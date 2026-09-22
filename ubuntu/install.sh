@@ -5,15 +5,17 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 INSTALL_ROOT=/opt/ubuntu-ai
 MODELS=none
 SKIP_TOOLS=0
+WITH_ALPACA=0
 
 usage() {
   cat <<'EOF'
-Usage: ./install.sh [--models none|core|all] [--skip-tools]
+Usage: ./install.sh [--models none|core|all] [--skip-tools] [--with-alpaca]
 
   --models none  Install configuration only (default)
   --models core  Also install Qwen3.5 9B and 4B
   --models all   Also install every configured model
   --skip-tools   Do not install Ollama, Hermes, or OpenCode
+  --with-alpaca  Install Flatpak + Flathub Alpaca GUI
 EOF
 }
 
@@ -21,6 +23,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --models) MODELS="${2:-}"; shift 2 ;;
     --skip-tools) SKIP_TOOLS=1; shift ;;
+    --with-alpaca) WITH_ALPACA=1; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown argument: $1" >&2; usage; exit 2 ;;
   esac
@@ -63,6 +66,14 @@ echo
 echo "== Ubuntu dependencies =="
 sudo apt-get update
 sudo apt-get install -y curl git xz-utils ca-certificates python3 python3-aiohttp
+
+if (( WITH_ALPACA == 1 )); then
+  sudo apt-get install -y flatpak
+  if ! flatpak remote-list --system --columns=name 2>/dev/null | grep -qx flathub; then
+    sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+  fi
+  sudo flatpak install -y flathub com.jeffser.Alpaca
+fi
 
 if (( SKIP_TOOLS == 0 )); then
   echo
