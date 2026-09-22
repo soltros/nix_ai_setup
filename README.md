@@ -81,9 +81,39 @@ hermes-gemma4-e4b
 hermes-gemma4-12b
 ```
 
-These aliases map to the corresponding `hermes-local-*` launchers, so you can still invoke the full command names directly if desired.
+These aliases map to the corresponding `hermes-local-*` launchers, so you can still invoke the full command names directly if desired. They use the **Durandal** persona by default.
 
-All local Hermes launchers require the Durandal assets managed by `~/nixos-config/modules/durandal-hermes-skin.nix`. They use the declarative `/var/lib/hermes/.hermes/SOUL.md` and `/var/lib/hermes/.hermes/skins/durandal-marathon.yaml` via symlinks and force `display.skin = "durandal-marathon"`. If either asset is missing or unreadable, the launcher exits instead of starting Hermes without the Durandal persona.
+Three declarative Hermes personas are available from `~/nixos-config/modules/durandal-hermes-skin.nix`:
+
+| Persona | Default launcher | Skin |
+| --- | --- | --- |
+| Durandal | `hermes-coder` / `hermes-local` | `durandal-marathon` |
+| 343 Guilty Spark | `spark` / `hermes-guilty-spark` | `guilty-spark-forerunner` |
+| Rasputin | `rasputin` / `hermes-rasputin` | `rasputin-ikelos` |
+
+The alternate personas also have model-specific aliases matching the Durandal set:
+
+```sh
+spark-fast
+spark-deepseek
+spark-qwen-coder
+spark-starcoder
+spark-granite
+spark-gemma4-e2b
+spark-gemma4-e4b
+spark-gemma4-12b
+
+rasputin-fast
+rasputin-deepseek
+rasputin-qwen-coder
+rasputin-starcoder
+rasputin-granite
+rasputin-gemma4-e2b
+rasputin-gemma4-e4b
+rasputin-gemma4-12b
+```
+
+Every launcher is fail-closed: it requires the selected persona's declarative `SOUL.md` and skin under `/var/lib/hermes/.hermes/personas/` and `/var/lib/hermes/.hermes/skins/`. The launcher symlinks those exact generated assets into its runtime home and sets the matching `display.skin`. Durandal remains the system-wide default for normal Hermes.
 
 **Hermes Desktop / another Hermes profile:** select a custom OpenAI-compatible provider with the settings below. `/etc/nix-ai-setup/hermes.yaml` contains the complete example, including `agent.max_turns = 12`. Selecting just the endpoint does not apply the profile's step limit.
 
