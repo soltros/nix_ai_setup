@@ -10,19 +10,22 @@ Usage:
   ubuntu-ai-model list
   ubuntu-ai-model install <alias>
   ubuntu-ai-model install-all
+  ubuntu-ai-model sync
   ubuntu-ai-model remove <alias>
 EOF
 }
 
 install_one() {
-  local alias="$1" source context tmp
+  local alias="$1" source native_context runtime_context tmp
   model_exists "$alias" || { echo "Unknown model alias: $alias" >&2; exit 2; }
   source="$(model_field "$alias" source)"
-  context="$(model_field "$alias" context)"
+  native_context="$(model_field "$alias" native_context)"
+  runtime_context="$(model_field "$alias" runtime_context)"
   tmp="$(mktemp)"
+  trap 'rm -f "$tmp"' RETURN
   cat >"$tmp" <<EOF
 FROM $source
-PARAMETER num_ctx $context
+PARAMETER num_ctx $runtime_context
 PARAMETER num_predict 4096
 PARAMETER temperature 0.7
 PARAMETER top_p 0.8
@@ -32,17 +35,27 @@ PARAMETER repeat_penalty 1.0
 EOF
   echo "Pulling $source..."
   ollama pull "$source"
-  echo "Creating tuned alias $alias:latest with native context $context..."
+  echo "Creating tuned alias $alias:latest with runtime context $runtime_context (native max $native_context)..."
   ollama create "$alias" -f "$tmp"
   rm -f "$tmp"
+  trap - RETURN
+}
+
+sync_one() {
+  local alias="$1"
+  if ollama show "$alias:latest" >/dev/null 2>&1; then
+    install_one "$alias"
+  else
+    echo "Skipping $alias:latest (not installed)"
+  fi
 }
 
 case "${1:-}" in
   list)
-    printf '%-30s %-25s %-10s %-6s %s\n' "MODEL ALIAS" "SOURCE" "CONTEXT" "TOOLS" "ROLE"
+    printf '%-30s %-25s %-10s %-10s %-6s %s\n' "MODEL ALIAS" "SOURCE" "NATIVE" "RUNTIME" "TOOLS" "ROLE"
     for row in "${UBUNTU_AI_MODELS[@]}"; do
-      IFS='|' read -r alias source context tools role <<<"$row"
-      printf '%-30s %-25s %-10s %-6s %s\n' "$alias:latest" "$source" "$context" "$tools" "$role"
+      IFS='|' read -r alias source native_context runtime_context tools role <<<"$row"
+      printf '%-30s %-25s %-10s %-10s %-6s %s\n' "$alias:latest" "$source" "$native_context" "$runtime_context" "$tools" "$role"
     done
     ;;
   install)
@@ -54,6 +67,14 @@ case "${1:-}" in
       IFS='|' read -r alias _ <<<"$row"
       install_one "$alias"
     done
+    ;;
+  sync)
+    echo "Synchronizing installed local Ollama aliases..."
+    for row in "${UBUNTU_AI_MODELS[@]}"; do
+      IFS='|' read -r alias _ <<<"$row"
+      sync_one "$alias"
+    done
+    echo "Context synchronization complete."
     ;;
   remove)
     [[ $# -eq 2 ]] || { usage; exit 2; }
