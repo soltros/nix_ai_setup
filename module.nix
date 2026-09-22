@@ -198,6 +198,7 @@ in
     environment.etc."nix-ai-setup/hermes.yaml".source = hermesConfig;
     environment.etc."nix-ai-setup/opencode.json".source = openCodeConfig;
     programs.zsh.shellAliases = {
+      ollama-models = ''printf '%s\n' "Model alias                     Source                    Role" "local-coder:latest              qwen3.5:9b                Default for focused coding and tool use; approximately 6.6 GB weights" "local-fast:latest               qwen3.5:4b                Faster small tasks and a fallback if 9B is too slow" "local-deepseek-coder:latest     deepseek-coder-v2:16b     Larger coding-focused MoE model; about 8.9 GB" "local-qwen-coder:latest         qwen2.5-coder:14b         Dedicated code model for refactoring, explanation, and generation; about 9.0 GB" "local-starcoder:latest          starcoder2:instruct       Instruct-tuned StarCoder2 for interactive programming; about 9.1 GB" "local-granite-code:latest       granite-code:8b           Lightweight IBM code model; about 4.6 GB" "local-gemma4-e2b:latest         gemma4:e2b                Compact Gemma 4 variant; about 7.2 GB" "local-gemma4-e4b:latest         gemma4:e4b                Mid-size Gemma 4 variant; about 9.6 GB" "local-gemma4-12b:latest         gemma4:12b                Dense Gemma 4 12B model; about 7.6 GB"'';
       ollama-get-coder = installModel "local-coder" aliases.local-coder;
       ollama-get-fast = installModel "local-fast" aliases.local-fast;
       ollama-get-deepseek-coder = installModel "local-deepseek-coder" aliases.local-deepseek-coder;
