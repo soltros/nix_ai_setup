@@ -108,6 +108,13 @@ sudo cp -a "$SCRIPT_DIR/." "$INSTALL_ROOT/"
 sudo find "$INSTALL_ROOT/bin" -type f -exec chmod 0755 {} +
 sudo chmod 0755 "$INSTALL_ROOT/install.sh" "$INSTALL_ROOT/uninstall.sh" 2>/dev/null || true
 
+echo
+echo "== Gateway unit tests =="
+(
+  cd "$INSTALL_ROOT"
+  python3 -m unittest -v test_gateway.py
+)
+
 for cmd in ubuntu-ai-model ubuntu-ai-help ubuntu-ai-diagnose hermes-ubuntu opencode-ubuntu; do
   sudo ln -sfn "$INSTALL_ROOT/bin/$cmd" "/usr/local/bin/$cmd"
 done
