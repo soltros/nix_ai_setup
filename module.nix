@@ -167,6 +167,19 @@ let
 
       # Seed opencode-mem once. User edits are preserved on later launches.
       mem_config="''${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode-mem.jsonc"
+      tui_config="''${XDG_CONFIG_HOME:-$HOME/.config}/opencode/tui.json"
+      if [ ! -e "$tui_config" ]; then
+        mkdir -p "$(dirname "$tui_config")"
+        cat >"$tui_config" <<'EOF'
+{
+  "plugin": [
+    "@prevalentware/opencode-goal-plugin",
+    "@tarquinen/opencode-dcp@latest"
+  ]
+}
+EOF
+      fi
+
       if [ ! -e "$mem_config" ]; then
         mkdir -p "$(dirname "$mem_config")"
         cat >"$mem_config" <<'EOF'
@@ -299,6 +312,7 @@ Desktop notifications    notify-send via libnotify
 Goal max auto turns      8
 Goal max duration        900s
 DCP load order           last
+TUI config seed          ~/.config/opencode/tui.json (only if absent)
 
 OPENCODE AGENT ALIASES
 opencode-local             Qwen3.5 9B
