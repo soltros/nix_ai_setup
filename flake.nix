@@ -47,8 +47,8 @@
           builtins.unsafeDiscardStringContext testSystem.config.system.build.toplevel.drvPath
         );
         launchers =
-          assert builtins.length openCodeLaunchers == 9;
-          assert builtins.length hermesLaunchers == 27;
+          assert builtins.length openCodeLaunchers == 6;
+          assert builtins.length hermesLaunchers == 18;
           pkgs.symlinkJoin {
             name = "nix-ai-launchers-check";
             paths = openCodeLaunchers ++ hermesLaunchers;
