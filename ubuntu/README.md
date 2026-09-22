@@ -289,7 +289,17 @@ Any extra arguments are passed to Hermes.
 
 ## OpenCode
 
-Every local OpenCode launcher enables [`opencode-mem`](https://github.com/tickernelz/opencode-mem) through OpenCode's native v2 `plugins` list. The published plugin package is downloaded automatically by OpenCode on first startup.
+Every local OpenCode launcher enables the same default plugin suite as the NixOS version:
+
+- `opencode-mem` for persistent local memory.
+- `@nick-vi/opencode-type-inject@latest` for TypeScript/Svelte type context and diagnostics.
+- `@kitlangton/opencode-session-recap` for inactive-session recaps.
+- `@kitlangton/opencode-pr-tracker` for PR/CI state.
+- `@mohak34/opencode-notifier@latest` for desktop notifications.
+- `@prevalentware/opencode-goal-plugin` for bounded persistent goals (8 auto turns / 15 minutes maximum).
+- `@tarquinen/opencode-dcp@latest` for dynamic context pruning, loaded last.
+
+OpenCode downloads the published plugin packages automatically on first startup. The Ubuntu installer installs `gh` and `libnotify-bin`; PR tracking requires a one-time `gh auth login`. Session recap requires a current OpenCode v2 build with the required session/TUI APIs.
 
 The launcher seeds this file only if it does not already exist:
 
