@@ -29,12 +29,40 @@ export OPENCODE_CONFIG_CONTENT="$(cat <<EOF
         "chunkTimeout": 190000
       },
       "models": {
-        "$model:latest": {
-          "name": "$model:latest",
-          "limit": {"context": $context, "output": 4096}
+        "local-coder:latest": {
+          "name": "local-coder:latest",
+          "limit": {"context": 262144, "output": 4096}
         },
         "local-fast:latest": {
           "name": "local-fast:latest",
+          "limit": {"context": 262144, "output": 4096}
+        },
+        "local-deepseek-coder:latest": {
+          "name": "local-deepseek-coder:latest",
+          "limit": {"context": 163840, "output": 4096}
+        },
+        "local-qwen-coder:latest": {
+          "name": "local-qwen-coder:latest",
+          "limit": {"context": 32768, "output": 4096}
+        },
+        "local-starcoder:latest": {
+          "name": "local-starcoder:latest",
+          "limit": {"context": 16384, "output": 4096}
+        },
+        "local-granite-code:latest": {
+          "name": "local-granite-code:latest",
+          "limit": {"context": 131072, "output": 4096}
+        },
+        "local-gemma4-e2b:latest": {
+          "name": "local-gemma4-e2b:latest",
+          "limit": {"context": 131072, "output": 4096}
+        },
+        "local-gemma4-e4b:latest": {
+          "name": "local-gemma4-e4b:latest",
+          "limit": {"context": 131072, "output": 4096}
+        },
+        "local-gemma4-12b:latest": {
+          "name": "local-gemma4-12b:latest",
           "limit": {"context": 262144, "output": 4096}
         }
       }
