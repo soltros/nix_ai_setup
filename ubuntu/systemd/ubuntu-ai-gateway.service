@@ -1,0 +1,22 @@
+[Unit]
+Description=Bounded local AI endpoint for Ollama, Hermes and OpenCode
+After=ollama.service network.target
+Requires=ollama.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/ubuntu-ai/gateway.py
+Environment=AI_BACKEND=http://127.0.0.1:11434
+Environment=AI_MAX_TOKENS=4096
+Environment=AI_TIMEOUT=180
+Restart=on-failure
+RestartSec=2
+DynamicUser=yes
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+RestrictAddressFamilies=AF_INET AF_UNIX
+
+[Install]
+WantedBy=multi-user.target
