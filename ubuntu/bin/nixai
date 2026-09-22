@@ -35,6 +35,9 @@ case "${1:---help}" in
     Raw Ollama               http://127.0.0.1:11434
     Request timeout          180s
     OpenCode/Hermes max steps 12
+    OpenCode output budget   4096
+    Hermes output budget     16384
+    Gateway output ceiling   16384
     Thinking/reasoning       disabled by bounded gateway
     
     OPENCODE PLUGINS (OpenCode 1.x compatible)
@@ -93,6 +96,7 @@ case "${1:---help}" in
     Ollama runtime context     65536 tokens for every Hermes-capable model
     Hermes context_length      65536 tokens
     Hermes ollama_num_ctx      65536 tokens
+    Hermes max_tokens          16384
     Minimum required by Hermes 64000 tokens
     32K Qwen2.5-Coder          OpenCode/direct only; not exposed through Hermes
 
