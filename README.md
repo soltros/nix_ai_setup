@@ -116,7 +116,7 @@ rasputin-gemma4-e4b
 rasputin-gemma4-12b
 ```
 
-Every launcher is fail-closed: it requires the selected persona's declarative `SOUL.md` and skin under `/var/lib/hermes/.hermes/personas/` and `/var/lib/hermes/.hermes/skins/`. The launcher symlinks those exact generated assets into its runtime home and sets the matching `display.skin`. Durandal remains the system-wide default for normal Hermes.
+Every launcher is fail-closed: it requires the selected persona's declarative `SOUL.md` and skin under `/var/lib/hermes/.hermes/personas/` and `/var/lib/hermes/.hermes/skins/`. The persona directories are canonical; normal Hermes keeps Durandal as the system-wide default by pointing `/var/lib/hermes/.hermes/SOUL.md` at `/var/lib/hermes/.hermes/personas/durandal/SOUL.md`. The launcher symlinks the selected canonical persona asset into its runtime home and sets the matching `display.skin`.
 
 For a compact terminal reference, run either:
 
