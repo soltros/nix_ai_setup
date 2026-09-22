@@ -128,26 +128,19 @@ Both now call `nixai --help`.
 
 ### OpenCode plugin suite
 
-Every generated local OpenCode launcher enables the following default plugins:
+Every generated local OpenCode launcher enables the following OpenCode 1.x-compatible default plugins:
 
 - `opencode-mem` for persistent local vector memory, project memory, profile learning, and auto-capture.
 - `@nick-vi/opencode-type-inject@latest` for TypeScript/Svelte type context and diagnostics.
-- `@kitlangton/opencode-session-recap` for a one-line recap after an inactive session.
-- `@kitlangton/opencode-pr-tracker` for current/session-created PR and CI state in the TUI.
 - `@mohak34/opencode-notifier@latest` for desktop/sound notifications when OpenCode finishes or needs attention.
 - `@prevalentware/opencode-goal-plugin` for persistent `/goal` workflows. Auto-continuation is bounded to 8 turns and 15 minutes, with no-progress and prompt-failure cutoffs.
 - `@tarquinen/opencode-dcp@latest` for dynamic context pruning. It is intentionally listed last so its message transforms see the output of the other plugins first.
 
 OpenCode downloads published plugin packages automatically on first startup.
 
-The module installs `gh` and `libnotify` as runtime dependencies. PR tracking requires a one-time:
+The module installs `libnotify` for Linux desktop notifications.
 
-```sh
-gh auth login
-```
-
-The session-recap plugin requires a current OpenCode v2 build exposing the `session.generate` API and the `session.composer.top` TUI slot.
-
+This repository currently targets the OpenCode 1.x build used on the configured system. OpenCode v2-only TUI plugins such as `@kitlangton/opencode-session-recap` and `@kitlangton/opencode-pr-tracker` are intentionally not enabled by default until the setup migrates to OpenCode v2.
 For `opencode-mem`, the launcher seeds `~/.config/opencode/opencode-mem.jsonc` only when that file does not already exist, so later user customization is preserved. The default configuration keeps memory local at `~/.opencode-mem/data`, binds the web UI to `127.0.0.1:4747`, enables auto-capture, and uses the local `nix-local` provider with `opencodeModel = "inherit"` so capture follows the active tool-capable OpenCode model. Manual memory operations remain available even if automatic capture cannot produce structured output.
 
 **Hermes Desktop / another Hermes profile:** select a custom OpenAI-compatible provider with the settings below. `/etc/nix-ai-setup/hermes.yaml` contains the complete example, including `agent.max_turns = 12`. Selecting just the endpoint does not apply the profile's step limit.
