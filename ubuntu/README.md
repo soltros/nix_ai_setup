@@ -297,7 +297,7 @@ Every local OpenCode launcher enables the same OpenCode 1.x-compatible default p
 - `@prevalentware/opencode-goal-plugin` for bounded persistent goals (8 auto turns / 15 minutes maximum).
 - `@tarquinen/opencode-dcp@latest` for dynamic context pruning, loaded last.
 
-OpenCode downloads the published plugin packages automatically on first startup. The Ubuntu installer installs `libnotify-bin` for desktop notifications. This setup currently targets OpenCode 1.x, so OpenCode v2-only TUI plugins such as session recap and PR tracking are intentionally left out until the setup migrates to v2.
+OpenCode downloads the published plugin packages automatically on first startup. The Ubuntu installer installs `libnotify-bin` for desktop notifications. The launcher also seeds `~/.config/opencode/tui.json` with Goal and DCP when that file does not already exist so their OpenCode 1 TUI integrations are available without overwriting an existing TUI config. This setup currently targets OpenCode 1.x, so OpenCode v2-only TUI plugins such as session recap and PR tracking are intentionally left out until the setup migrates to v2.
 
 The launcher seeds this file only if it does not already exist:
 
