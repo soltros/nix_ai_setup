@@ -119,6 +119,7 @@ let
         api_key = "ollama";
         context_length = hermesContextForModel model;
         ollama_num_ctx = hermesContextForModel model;
+        max_tokens = cfg.hermesMaxTokens;
       };
       agent = {
         max_turns = 12;
@@ -417,6 +418,9 @@ Gateway                  http://127.0.0.1:11435
 Raw Ollama               http://127.0.0.1:11434
 Request timeout          ${toString cfg.requestTimeout}s
 OpenCode/Hermes max steps 12
+OpenCode output budget   ${toString cfg.maxTokens}
+Hermes output budget     ${toString cfg.hermesMaxTokens}
+Gateway output ceiling   ${toString (lib.max cfg.maxTokens cfg.hermesMaxTokens)}
 Thinking/reasoning       disabled by bounded gateway
 
 OPENCODE PLUGINS (OpenCode 1.x compatible)
@@ -474,7 +478,8 @@ DeepSeek Coder V2, StarCoder2, and Granite Code remain available through:
 HERMES RUNTIME
 Ollama runtime context     65536 tokens for every Hermes-capable model
 Hermes context_length      65536 tokens
-Hermes ollama_num_ctx      65536 tokens, sent on every local request
+Hermes ollama_num_ctx      65536 tokens
+Hermes max_tokens          ${toString cfg.hermesMaxTokens}
 Minimum required by Hermes 64000 tokens
 32K Qwen2.5-Coder          OpenCode/direct only; not exposed through Hermes
 
@@ -561,6 +566,12 @@ in
     maxTokens = lib.mkOption {
       type = lib.types.ints.positive;
       default = 4096;
+      description = "OpenCode/default bounded output-token limit.";
+    };
+    hermesMaxTokens = lib.mkOption {
+      type = lib.types.ints.positive;
+      default = 16384;
+      description = "Hermes output-token budget. Gemma 4 requires a larger budget to avoid reasoning consuming the entire completion.";
     };
     requestTimeout = lib.mkOption {
       type = lib.types.ints.positive;
@@ -691,7 +702,7 @@ in
       after = [ "ollama.service" ];
       requires = [ "ollama.service" ];
       environment = {
-        AI_MAX_TOKENS = toString cfg.maxTokens;
+        AI_MAX_TOKENS = toString (lib.max cfg.maxTokens cfg.hermesMaxTokens);
         AI_CONTEXT = toString cfg.contextLength;
         AI_TIMEOUT = toString cfg.requestTimeout;
       };
