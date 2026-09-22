@@ -232,7 +232,7 @@ Runtime Hermes state lives under:
 ~/.local/state/ubuntu-ai/hermes
 ```
 
-The launcher regenerates `config.yaml` for every run, symlinks the selected SOUL and skin, and sets both `context_length` and `ollama_num_ctx` to the tuned runtime context.
+The launcher regenerates `config.yaml` for every run, symlinks the selected SOUL and skin, and sets both `context_length` and `ollama_num_ctx` to the tuned runtime context. Gemma remains the preferred/default persona model, but Hermes automatically falls back to `local-coder:latest` (Qwen3.5 9B) after repeated invalid or empty responses, which works around current Ollama Gemma 4 tool-call parser failures.
 
 Hermes and OpenCode agent launchers are intentionally limited to models that advertise native tool calling in Ollama. DeepSeek Coder V2, StarCoder2, and Granite Code remain available for direct coding/chat through:
 
