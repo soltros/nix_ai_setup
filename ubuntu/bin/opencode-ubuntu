@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="${UBUNTU_AI_ROOT:-/opt/ubuntu-ai}"
+# shellcheck source=/dev/null
+source "$ROOT/lib/models.sh"
+
+model="${1:-local-coder}"
+shift $(( $# >= 1 ? 1 : 0 ))
+model_exists "$model" || { echo "Unknown model alias: $model" >&2; exit 2; }
+context="$(model_field "$model" context)"
+
+export OPENCODE_CONFIG_CONTENT="$(cat <<EOF
+{
+  "\$schema": "https://opencode.ai/config.json",
+  "model": "nix-local/$model:latest",
+  "small_model": "nix-local/local-fast:latest",
+  "enabled_providers": ["nix-local"],
+  "autoupdate": false,
+  "share": "disabled",
+  "provider": {
+    "nix-local": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Local NVIDIA GPU (bounded)",
+      "options": {
+        "baseURL": "http://127.0.0.1:11435/v1",
+        "apiKey": "ollama",
+        "timeout": 190000,
+        "headerTimeout": 190000,
+        "chunkTimeout": 190000
+      },
+      "models": {
+        "$model:latest": {
+          "name": "$model:latest",
+          "limit": {"context": $context, "output": 4096}
+        },
+        "local-fast:latest": {
+          "name": "local-fast:latest",
+          "limit": {"context": 262144, "output": 4096}
+        }
+      }
+    }
+  },
+  "agent": {
+    "build": {"steps": 12, "permission": {"task": "deny"}},
+    "plan": {"steps": 12, "permission": {"task": "deny"}}
+  }
+}
+EOF
+)"
+exec opencode "$@"
