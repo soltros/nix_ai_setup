@@ -347,6 +347,35 @@ com.jeffser.Alpaca
 
 Configure Alpaca to use an external Ollama/OpenAI-compatible connection through the local services rather than launching a separate competing backend.
 
+## Validation
+
+A repository CI workflow at `.github/workflows/ubuntu-validate.yml` validates the Ubuntu tree on `ubuntu-latest` with:
+
+- `bash -n` for every Bash script
+- ShellCheck
+- Python bytecode compilation
+- the bounded-gateway unit test suite
+
+The installer also runs the gateway unit tests locally before it enables `ubuntu-ai-gateway.service`.
+
+Manual unit-test run:
+
+```bash
+cd /opt/ubuntu-ai
+python3 -m unittest -v test_gateway.py
+```
+
+After `local-coder` has been installed, run the live end-to-end test:
+
+```bash
+cd /opt/ubuntu-ai
+python3 smoke.py
+```
+
+The smoke test checks native Ollama generation through the bounded gateway, OpenAI-compatible generation, structured tool calls, disabled reasoning, and reported GPU residency.
+
+CI cannot verify the real RTX 3060, NVIDIA driver, CUDA execution, full VRAM residency, or an actual interactive Hermes/OpenCode session. Those checks must be done on Nicole's Ubuntu machine.
+
 ## Diagnostics
 
 Run:
