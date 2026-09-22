@@ -57,6 +57,7 @@ ollama-get-gemma4-e2b       # Gemma 4 E2B
 ollama-get-gemma4-e4b       # Gemma 4 E4B
 ollama-get-gemma4-12b       # Gemma 4 12B
 ollama-get-models           # install every configured model, sequentially
+ollama-models               # print the configured model alias/source/role table
 ollama list
 ```
 
