@@ -54,7 +54,16 @@ If a download fails, retry with `sudo systemctl restart nix-ai-models`. Existing
 
 **Hermes Desktop / another Hermes profile:** select a custom OpenAI-compatible provider with the settings below. `/etc/nix-ai-setup/hermes.yaml` contains the complete example, including `agent.max_turns = 12`. Selecting just the endpoint does not apply the profile's step limit.
 
-**OpenCode:** installed by this module; run `opencode-local`. It selects the local provider, caps build/plan agents at 12 steps, and disables task delegation. Project-level OpenCode configuration can override settings, so check it if behavior differs. Normal `opencode` retains your normal configuration.
+**OpenCode:** installed by this module. Run `opencode-local` for the 9B coding model or `opencode-local-fast` for the faster 4B model. Both commands force the bounded local provider even when a repository contains its own OpenCode configuration, cap build/plan agents at 12 steps, disable task delegation, disable sharing, and leave automatic package updates to Nix. Normal `opencode` retains your normal configuration and providers.
+
+For a one-shot task, use either launcher exactly like regular OpenCode:
+
+```sh
+opencode-local run "Inspect this repository and explain the failing test"
+opencode-local-fast run "Summarize the current diff"
+```
+
+The generated configuration remains available at `/etc/nix-ai-setup/opencode.json` for inspection and for tools that accept a configuration path.
 
 **Other tools** (for example an editor's OpenAI-compatible provider):
 
