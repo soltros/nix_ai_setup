@@ -97,6 +97,7 @@ let
     inherit model;
     small_model = "nix-local/local-fast:latest";
     enabled_providers = [ "nix-local" ];
+    plugins = [ "opencode-mem" ];
     autoupdate = false;
     share = "disabled";
     provider.nix-local = {
@@ -140,6 +141,39 @@ let
       # cannot silently switch this launcher back to a cloud provider.
       OPENCODE_CONFIG_CONTENT="$(< ${runtimeConfig})"
       export OPENCODE_CONFIG_CONTENT
+
+      # Seed opencode-mem once. User edits are preserved on later launches.
+      mem_config="''${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode-mem.jsonc"
+      if [ ! -e "$mem_config" ]; then
+        mkdir -p "$(dirname "$mem_config")"
+        cat >"$mem_config" <<'EOF'
+{
+  "storagePath": "~/.opencode-mem/data",
+  "webServerEnabled": true,
+  "webServerHost": "127.0.0.1",
+  "webServerPort": 4747,
+  "autoCaptureEnabled": true,
+  "opencodeProvider": "nix-local",
+  "opencodeModel": "inherit",
+  "showAutoCaptureToasts": true,
+  "showUserProfileToasts": true,
+  "showErrorToasts": true,
+  "userProfileAnalysisInterval": 10,
+  "maxMemories": 10,
+  "compaction": {
+    "enabled": true,
+    "memoryLimit": 10
+  },
+  "chatMessage": {
+    "enabled": true,
+    "maxMemories": 3,
+    "excludeCurrentSession": true,
+    "injectOn": "first"
+  }
+}
+EOF
+      fi
+
       exec ${lib.getExe pkgs.opencode} "$@"
     '';
   hermesLauncher =
@@ -181,6 +215,125 @@ let
   hermesSpark = name: model: hermesLauncher name model "guilty-spark" "guilty-spark-forerunner";
   hermesRasputin = name: model: hermesLauncher name model "rasputin" "rasputin-ikelos";
   hermesLocal = hermesDurandal "hermes-local" "local-coder:latest";
+
+  nixai = pkgs.writeShellApplication {
+    name = "nixai";
+    text = ''
+      case "''${1:---help}" in
+        -h|--help|help)
+          cat <<'EOF'
+NIXAI — local AI command reference
+
+MODELS
+Alias                          Source                    Context   Tools  Role
+local-coder:latest             qwen3.5:9b                262144    yes    Default focused coding/tool model (~6.6 GB)
+local-fast:latest              qwen3.5:4b                262144    yes    Faster fallback/small-task model
+local-deepseek-coder:latest    deepseek-coder-v2:16b     163840    no     Coding/chat-only MoE model (~8.9 GB)
+local-qwen-coder:latest        qwen2.5-coder:14b         32768     yes    Dedicated coding/refactor model (~9.0 GB)
+local-starcoder:latest         starcoder2:instruct       16384     no     Coding/chat-only instruct model (~9.1 GB)
+local-granite-code:latest      granite-code:8b           131072    no     Lightweight coding/chat-only model (~4.6 GB)
+local-gemma4-e2b:latest        gemma4:e2b                131072    yes    Compact Gemma 4 (~7.2 GB)
+local-gemma4-e4b:latest        gemma4:e4b                131072    yes    Mid-size Gemma 4 (~9.6 GB)
+local-gemma4-12b:latest        gemma4:12b                262144    yes    Gemma 4 12B (~7.6 GB)
+
+MODEL PARAMETERS
+num_predict              ${toString cfg.maxTokens}
+temperature              0.7
+top_p                    0.8
+top_k                    20
+presence_penalty         1.5
+repeat_penalty           1.0
+KV cache                 q8_0
+Flash attention          enabled
+Loaded models            1
+Parallel generations     1
+Queue limit              4
+Keep alive               5m
+Gateway                  http://127.0.0.1:11435
+Raw Ollama               http://127.0.0.1:11434
+Request timeout          ${toString cfg.requestTimeout}s
+OpenCode/Hermes max steps 12
+Thinking/reasoning       disabled by bounded gateway
+
+OPENCODE-MEM
+Plugin                   opencode-mem
+Enabled                  yes, on every OpenCode local launcher
+Storage                  ~/.opencode-mem/data
+Web UI                   http://127.0.0.1:4747
+Auto-capture             enabled
+Capture provider         nix-local
+Capture model            inherit active tool-capable model
+Config                   ~/.config/opencode/opencode-mem.jsonc
+Note                     Seeded once; user edits are preserved.
+
+OPENCODE AGENT ALIASES
+opencode-local             Qwen3.5 9B
+opencode-local-fast        Qwen3.5 4B
+opencode-local-qwen-coder  Qwen2.5-Coder 14B
+opencode-local-gemma4-e2b  Gemma 4 E2B
+opencode-local-gemma4-e4b  Gemma 4 E4B
+opencode-local-gemma4-12b  Gemma 4 12B
+
+HERMES — DURANDAL
+hermes-coder               Qwen3.5 9B
+hermes-fast                Qwen3.5 4B
+hermes-qwen-coder          Qwen2.5-Coder 14B
+hermes-gemma4-e2b          Gemma 4 E2B
+hermes-gemma4-e4b          Gemma 4 E4B
+hermes-gemma4-12b          Gemma 4 12B
+
+HERMES — 343 GUILTY SPARK
+spark                      Qwen3.5 9B
+spark-fast                 Qwen3.5 4B
+spark-qwen-coder           Qwen2.5-Coder 14B
+spark-gemma4-e2b           Gemma 4 E2B
+spark-gemma4-e4b           Gemma 4 E4B
+spark-gemma4-12b           Gemma 4 12B
+
+HERMES — RASPUTIN
+rasputin                   Qwen3.5 9B
+rasputin-fast              Qwen3.5 4B
+rasputin-qwen-coder        Qwen2.5-Coder 14B
+rasputin-gemma4-e2b        Gemma 4 E2B
+rasputin-gemma4-e4b        Gemma 4 E4B
+rasputin-gemma4-12b        Gemma 4 12B
+
+DIRECT CHAT / COMPLETION ONLY
+deepseek-chat              DeepSeek Coder V2 16B
+starcoder-chat             StarCoder2 Instruct
+granite-chat               Granite Code 8B
+
+MODEL MANAGEMENT
+ollama-get-coder
+ollama-get-fast
+ollama-get-deepseek-coder
+ollama-get-qwen-coder
+ollama-get-starcoder
+ollama-get-granite-code
+ollama-get-gemma4-e2b
+ollama-get-gemma4-e4b
+ollama-get-gemma4-12b
+ollama-get-models           Install all configured models sequentially
+ollama list                 Show installed Ollama models
+ollama ps                   Show loaded model and GPU residency
+
+PERSONAS
+Durandal                    durandal-marathon
+343 Guilty Spark            guilty-spark-forerunner
+Rasputin                    rasputin-ikelos
+
+COMPATIBILITY HELP ALIASES
+hermes-help                 nixai --help
+ollama-models               nixai --help
+EOF
+          ;;
+        *)
+          echo "Usage: nixai --help" >&2
+          exit 2
+          ;;
+      esac
+    '';
+  };
 in
 {
   options.services.nix-ai-setup = {
@@ -228,6 +381,7 @@ in
     environment.systemPackages = [
       pkgs.alpaca
       pkgs.opencode
+      nixai
       hermesLocal
       (hermesDurandal "hermes-local-fast" "local-fast:latest")
       (hermesDurandal "hermes-local-qwen-coder" "local-qwen-coder:latest")
@@ -285,40 +439,8 @@ in
       deepseek-chat = "ollama run local-deepseek-coder:latest";
       starcoder-chat = "ollama run local-starcoder:latest";
       granite-chat = "ollama run local-granite-code:latest";
-      ollama-models = ''printf '%s\n' \
-        "MODEL ALIASES" \
-        "Model alias                     Source                    Context   Tools  Role" \
-        "local-coder:latest              qwen3.5:9b                262144    yes    Default for focused coding and tool use; approximately 6.6 GB weights" \
-        "local-fast:latest               qwen3.5:4b                262144    yes    Faster small tasks and a fallback if 9B is too slow" \
-        "local-deepseek-coder:latest     deepseek-coder-v2:16b     163840    no     Larger coding-focused MoE model; about 8.9 GB" \
-        "local-qwen-coder:latest         qwen2.5-coder:14b         32768     yes    Dedicated code model for refactoring, explanation, and generation; about 9.0 GB" \
-        "local-starcoder:latest          starcoder2:instruct       16384     no     Instruct-tuned StarCoder2 for interactive programming; about 9.1 GB" \
-        "local-granite-code:latest       granite-code:8b           131072    no     Lightweight IBM code model; about 4.6 GB" \
-        "local-gemma4-e2b:latest         gemma4:e2b                131072    yes    Compact Gemma 4 variant; about 7.2 GB" \
-        "local-gemma4-e4b:latest         gemma4:e4b                131072    yes    Mid-size Gemma 4 variant; about 9.6 GB" \
-        "local-gemma4-12b:latest         gemma4:12b                262144    yes    Dense Gemma 4 12B model; about 7.6 GB" \
-        "" \
-        "HERMES PERSONAS" \
-        "Persona            Default alias     Skin" \
-        "Durandal           hermes-coder      durandal-marathon" \
-        "343 Guilty Spark   spark             guilty-spark-forerunner" \
-        "Rasputin           rasputin          rasputin-ikelos" \
-        "" \
-        "DURANDAL MODEL ALIASES" \
-        "hermes-coder  hermes-fast  hermes-qwen-coder" \
-        "hermes-gemma4-e2b  hermes-gemma4-e4b  hermes-gemma4-12b" \
-        "" \
-        "GUILTY SPARK MODEL ALIASES" \
-        "spark  spark-fast  spark-qwen-coder" \
-        "spark-gemma4-e2b  spark-gemma4-e4b  spark-gemma4-12b" \
-        "" \
-        "RASPUTIN MODEL ALIASES" \
-        "rasputin  rasputin-fast  rasputin-qwen-coder" \
-        "rasputin-gemma4-e2b  rasputin-gemma4-e4b  rasputin-gemma4-12b" \
-        "" \
-        "DIRECT CHAT / COMPLETION ONLY (NO NATIVE TOOL CALLING)" \
-        "deepseek-chat  starcoder-chat  granite-chat"'';
-      hermes-help = "ollama-models";
+      ollama-models = "nixai --help";
+      hermes-help = "nixai --help";
       ollama-get-coder = installModel "local-coder" aliases.local-coder;
       ollama-get-fast = installModel "local-fast" aliases.local-fast;
       ollama-get-deepseek-coder = installModel "local-deepseek-coder" aliases.local-deepseek-coder;
