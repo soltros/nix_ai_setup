@@ -72,7 +72,11 @@ auxiliary:
     provider: main
   tool_selection:
     provider: main
-fallback_providers: []
+fallback_providers:
+  - provider: custom
+    model: local-coder:latest
+    base_url: http://127.0.0.1:11435/v1
+    api_key: ollama
 display:
   skin: $skin
 EOF
