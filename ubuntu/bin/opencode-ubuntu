@@ -14,6 +14,19 @@ model_exists "$model" || { echo "Unknown model alias: $model" >&2; exit 2; }
 }
 context="$(model_field "$model" context)"
 
+tui_config="${XDG_CONFIG_HOME:-$HOME/.config}/opencode/tui.json"
+if [[ ! -e "$tui_config" ]]; then
+  mkdir -p "$(dirname "$tui_config")"
+  cat >"$tui_config" <<'EOF'
+{
+  "plugin": [
+    "@prevalentware/opencode-goal-plugin",
+    "@tarquinen/opencode-dcp@latest"
+  ]
+}
+EOF
+fi
+
 mem_config="${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode-mem.jsonc"
 if [[ ! -e "$mem_config" ]]; then
   mkdir -p "$(dirname "$mem_config")"
