@@ -148,17 +148,17 @@ This is important for Hermes: Hermes receives the same context length that the t
 
 ## Models
 
-| Model alias | Source | Native context | Role |
-| --- | --- | ---: | --- |
-| `local-coder:latest` | `qwen3.5:9b` | 262,144 | Default focused coding/tool model; ~6.6 GB |
-| `local-fast:latest` | `qwen3.5:4b` | 262,144 | Faster small-task model |
-| `local-deepseek-coder:latest` | `deepseek-coder-v2:16b` | 163,840 | Larger coding-focused MoE model; ~8.9 GB |
-| `local-qwen-coder:latest` | `qwen2.5-coder:14b` | 32,768 | Dedicated code/refactor model; ~9.0 GB |
-| `local-starcoder:latest` | `starcoder2:instruct` | 16,384 | Interactive StarCoder2; ~9.1 GB |
-| `local-granite-code:latest` | `granite-code:8b` | 131,072 | Lightweight IBM code model; ~4.6 GB |
-| `local-gemma4-e2b:latest` | `gemma4:e2b` | 131,072 | Compact Gemma 4; ~7.2 GB |
-| `local-gemma4-e4b:latest` | `gemma4:e4b` | 131,072 | Mid-size Gemma 4; ~9.6 GB |
-| `local-gemma4-12b:latest` | `gemma4:12b` | 262,144 | Gemma 4 12B; ~7.6 GB |
+| Model alias | Source | Native context | Tools | Role |
+| --- | --- | ---: | :---: | --- |
+| `local-coder:latest` | `qwen3.5:9b` | 262,144 | yes | Default focused coding/tool model; ~6.6 GB |
+| `local-fast:latest` | `qwen3.5:4b` | 262,144 | yes | Faster small-task model |
+| `local-deepseek-coder:latest` | `deepseek-coder-v2:16b` | 163,840 | no | Larger coding-focused MoE model; ~8.9 GB |
+| `local-qwen-coder:latest` | `qwen2.5-coder:14b` | 32,768 | yes | Dedicated code/refactor model; ~9.0 GB |
+| `local-starcoder:latest` | `starcoder2:instruct` | 16,384 | no | Interactive StarCoder2; ~9.1 GB |
+| `local-granite-code:latest` | `granite-code:8b` | 131,072 | no | Lightweight IBM code model; ~4.6 GB |
+| `local-gemma4-e2b:latest` | `gemma4:e2b` | 131,072 | yes | Compact Gemma 4; ~7.2 GB |
+| `local-gemma4-e4b:latest` | `gemma4:e4b` | 131,072 | yes | Mid-size Gemma 4; ~9.6 GB |
+| `local-gemma4-12b:latest` | `gemma4:12b` | 262,144 | yes | Gemma 4 12B; ~7.6 GB |
 
 Only one model is configured to stay loaded at once.
 
@@ -226,15 +226,22 @@ Runtime Hermes state lives under:
 
 The launcher regenerates `config.yaml` for every run, symlinks the selected SOUL and skin, and sets the correct native model context.
 
+Hermes and OpenCode agent launchers are intentionally limited to models that advertise native tool calling in Ollama. DeepSeek Coder V2, StarCoder2, and Granite Code remain available for direct coding/chat through:
+
+```bash
+deepseek-chat
+starcoder-chat
+granite-chat
+```
+
+The generic `hermes-ubuntu` and `opencode-ubuntu` launchers reject those non-tool models with a clear error instead of allowing an agent client to fail mid-request.
+
 ### Durandal aliases
 
 ```bash
 hermes-coder
 hermes-fast
-hermes-deepseek
 hermes-qwen-coder
-hermes-starcoder
-hermes-granite
 hermes-gemma4-e2b
 hermes-gemma4-e4b
 hermes-gemma4-12b
@@ -245,10 +252,7 @@ hermes-gemma4-12b
 ```bash
 spark
 spark-fast
-spark-deepseek
 spark-qwen-coder
-spark-starcoder
-spark-granite
 spark-gemma4-e2b
 spark-gemma4-e4b
 spark-gemma4-12b
@@ -259,10 +263,7 @@ spark-gemma4-12b
 ```bash
 rasputin
 rasputin-fast
-rasputin-deepseek
 rasputin-qwen-coder
-rasputin-starcoder
-rasputin-granite
 rasputin-gemma4-e2b
 rasputin-gemma4-e4b
 rasputin-gemma4-12b
@@ -285,10 +286,7 @@ The same nine local models are exposed through OpenCode:
 ```bash
 opencode-local
 opencode-local-fast
-opencode-local-deepseek
 opencode-local-qwen-coder
-opencode-local-starcoder
-opencode-local-granite
 opencode-local-gemma4-e2b
 opencode-local-gemma4-e4b
 opencode-local-gemma4-12b
