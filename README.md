@@ -37,14 +37,16 @@ If cloning a private repository, use `git+ssh://git@github.com/soltros/nix_ai_se
 
 ## First startup
 
-Model downloads run in the background after activation; finishing a rebuild does not mean downloads have finished.
+Model downloads are explicit so rebuilding never starts a large network transfer. After activation, open a new Zsh session and choose one of these aliases:
 
 ```sh
-journalctl -fu nix-ai-models
+ollama-get-coder   # Qwen3.5 9B and the local-coder alias
+ollama-get-fast    # Qwen3.5 4B and the local-fast alias
+ollama-get-models  # both, sequentially
 ollama list
 ```
 
-If a download fails, retry with `sudo systemctl restart nix-ai-models`. Existing unrelated models are never deleted. Upstream model tags can change; `flake.lock` pins Nix packages, not downloaded model weights. Record `ollama list` IDs when comparing results.
+The aliases first pull the upstream model and then create the tuned local alias used by Hermes and OpenCode. They are safe to run again after an interrupted download. Existing unrelated models are never deleted. Upstream model tags can change; `flake.lock` pins Nix packages, not downloaded model weights. Record `ollama list` IDs when comparing results.
 
 ## Connect your tools
 
@@ -115,7 +117,7 @@ The smoke test checks native generation, OpenAI generation, and an actual struct
 For logs:
 
 ```sh
-journalctl -u ollama -u nix-ai-gateway -u nix-ai-models -b --no-pager -n 100
+journalctl -u ollama -u nix-ai-gateway -b --no-pager -n 100
 ```
 
 ## Validation and limitations

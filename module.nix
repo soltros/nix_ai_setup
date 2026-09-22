@@ -24,6 +24,8 @@ let
       PARAMETER presence_penalty 1.5
       PARAMETER repeat_penalty 1.0
     '';
+  installModel =
+    name: source: "ollama pull ${source} && ollama create ${name} -f ${modelfile name source}";
   hermesConfig = (pkgs.formats.yaml { }).generate "hermes-local.yaml" {
     model = {
       provider = "custom";
@@ -171,6 +173,11 @@ in
     ];
     environment.etc."nix-ai-setup/hermes.yaml".source = hermesConfig;
     environment.etc."nix-ai-setup/opencode.json".source = openCodeConfig;
+    programs.zsh.shellAliases = {
+      ollama-get-coder = installModel "local-coder" aliases.local-coder;
+      ollama-get-fast = installModel "local-fast" aliases.local-fast;
+      ollama-get-models = "${installModel "local-coder" aliases.local-coder} && ${installModel "local-fast" aliases.local-fast}";
+    };
     systemd.services.nix-ai-gateway = {
       description = "Bounded local AI endpoint for Alpaca and agents";
       wantedBy = [ "multi-user.target" ];
@@ -194,40 +201,6 @@ in
           "AF_UNIX"
         ];
       };
-    };
-    systemd.services.nix-ai-models = {
-      description = "Download and configure local AI models";
-      wantedBy = [ "multi-user.target" ];
-      wants = [ "network-online.target" ];
-      after = [
-        "ollama.service"
-        "network-online.target"
-      ];
-      requires = [ "ollama.service" ];
-      path = [
-        pkgs.ollama-vulkan
-        pkgs.curl
-        pkgs.coreutils
-      ];
-      environment.OLLAMA_HOST = "127.0.0.1:11434";
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        TimeoutStartSec = "2h";
-        DynamicUser = true;
-      };
-      script = ''
-        for attempt in $(seq 1 60); do
-          if curl --silent --fail http://127.0.0.1:11434/api/version >/dev/null; then break; fi
-          sleep 1
-        done
-      ''
-      + lib.concatStringsSep "\n" (
-        lib.mapAttrsToList (name: source: ''
-          ollama pull ${source}
-          ollama create ${name} -f ${modelfile name source}
-        '') aliases
-      );
     };
   };
 }
