@@ -257,13 +257,12 @@ EOF
     runtimeInputs = [
       pkgs.coreutils
       pkgs.systemd
-      pkgs.sudo
     ];
     text = ''
       set -euo pipefail
 
       if [ "''${EUID:-$(id -u)}" -ne 0 ]; then
-        exec sudo "$0" "$@"
+        exec /run/wrappers/bin/sudo "$0" "$@"
       fi
 
       hermes_home=/var/lib/hermes/.hermes
