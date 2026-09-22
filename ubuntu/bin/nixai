@@ -97,6 +97,8 @@ case "${1:---help}" in
     Hermes context_length      65536 tokens
     Hermes ollama_num_ctx      65536 tokens
     Hermes max_tokens          16384
+    Fallback model             local-coder:latest / Qwen3.5 9B
+    Fallback trigger           after Hermes exhausts invalid/empty-response retries
     Minimum required by Hermes 64000 tokens
     32K Qwen2.5-Coder          OpenCode/direct only; not exposed through Hermes
 
