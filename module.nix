@@ -268,7 +268,13 @@ EOF
       hermes_home=/var/lib/hermes/.hermes
 
       echo "Materializing Hermes persona assets from installed tmpfiles rules..."
-      systemd-tmpfiles --create --prefix="$hermes_home"
+      # Restrict tmpfiles processing to the persona assets we own. Do not scan
+      # the entire Hermes state directory, which may legitimately contain
+      # user-owned files such as auth.json.
+      systemd-tmpfiles --create \
+        --prefix="$hermes_home/personas" \
+        --prefix="$hermes_home/skins" \
+        --prefix="$hermes_home/SOUL.md"
 
       required=(
         "$hermes_home/SOUL.md"
