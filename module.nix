@@ -33,36 +33,39 @@ let
     '';
   installModel =
     name: source: "ollama pull ${source} && ollama create ${name} -f ${modelfile name source}";
-  hermesConfig = (pkgs.formats.yaml { }).generate "hermes-local.yaml" {
-    model = {
-      provider = "custom";
-      default = "local-coder:latest";
-      base_url = "${endpoint}/v1";
-      api_key = "ollama";
-      context_length = cfg.contextLength;
+  hermesConfigFor =
+    name: model:
+    (pkgs.formats.yaml { }).generate "${name}.yaml" {
+      model = {
+        provider = "custom";
+        default = model;
+        base_url = "${endpoint}/v1";
+        api_key = "ollama";
+        context_length = cfg.contextLength;
+      };
+      agent = {
+        max_turns = 12;
+        api_max_retries = 1;
+        reasoning_effort = "none";
+      };
+      platform_toolsets.cli = [
+        "terminal"
+        "file"
+      ];
+      terminal = {
+        backend = "local";
+        timeout = 60;
+      };
+      compression = {
+        enabled = true;
+        threshold = 0.65;
+      };
+      auxiliary = lib.genAttrs [ "compression" "title_generation" "tool_selection" ] (_: {
+        provider = "main";
+      });
+      fallback_providers = [ ];
     };
-    agent = {
-      max_turns = 12;
-      api_max_retries = 1;
-      reasoning_effort = "none";
-    };
-    platform_toolsets.cli = [
-      "terminal"
-      "file"
-    ];
-    terminal = {
-      backend = "local";
-      timeout = 60;
-    };
-    compression = {
-      enabled = true;
-      threshold = 0.65;
-    };
-    auxiliary = lib.genAttrs [ "compression" "title_generation" "tool_selection" ] (_: {
-      provider = "main";
-    });
-    fallback_providers = [ ];
-  };
+  hermesConfig = hermesConfigFor "hermes-local" "local-coder:latest";
   openCodeConfigFor = model: {
     "$schema" = "https://opencode.ai/config.json";
     inherit model;
@@ -123,21 +126,27 @@ let
       export OPENCODE_CONFIG_CONTENT
       exec ${lib.getExe pkgs.opencode} "$@"
     '';
-  hermesLocal = pkgs.writeShellApplication {
-    name = "hermes-local";
-    runtimeInputs = [ pkgs.coreutils ];
-    text = ''
-      export HERMES_HOME="''${XDG_STATE_HOME:-$HOME/.local/state}/nix-ai-setup/hermes"
-      mkdir -p "$HERMES_HOME"
-      cp ${hermesConfig} "$HERMES_HOME/config.yaml"
-      chmod 600 "$HERMES_HOME/config.yaml"
-      export OPENAI_API_KEY=ollama
-      export OPENAI_BASE_URL=${endpoint}/v1
-      export HERMES_API_TIMEOUT=${toString cfg.requestTimeout}
-      export HERMES_STREAM_READ_TIMEOUT=${toString cfg.requestTimeout}
-      exec hermes "$@"
-    '';
-  };
+  hermesLauncher =
+    name: model:
+    let
+      runtimeConfig = hermesConfigFor name model;
+    in
+    pkgs.writeShellApplication {
+      inherit name;
+      runtimeInputs = [ pkgs.coreutils ];
+      text = ''
+        export HERMES_HOME="''${XDG_STATE_HOME:-$HOME/.local/state}/nix-ai-setup/hermes"
+        mkdir -p "$HERMES_HOME"
+        cp ${runtimeConfig} "$HERMES_HOME/config.yaml"
+        chmod 600 "$HERMES_HOME/config.yaml"
+        export OPENAI_API_KEY=ollama
+        export OPENAI_BASE_URL=${endpoint}/v1
+        export HERMES_API_TIMEOUT=${toString cfg.requestTimeout}
+        export HERMES_STREAM_READ_TIMEOUT=${toString cfg.requestTimeout}
+        exec hermes "$@"
+      '';
+    };
+  hermesLocal = hermesLauncher "hermes-local" "local-coder:latest";
 in
 {
   options.services.nix-ai-setup = {
@@ -185,6 +194,14 @@ in
       pkgs.alpaca
       pkgs.opencode
       hermesLocal
+      (hermesLauncher "hermes-local-fast" "local-fast:latest")
+      (hermesLauncher "hermes-local-deepseek" "local-deepseek-coder:latest")
+      (hermesLauncher "hermes-local-qwen-coder" "local-qwen-coder:latest")
+      (hermesLauncher "hermes-local-starcoder" "local-starcoder:latest")
+      (hermesLauncher "hermes-local-granite" "local-granite-code:latest")
+      (hermesLauncher "hermes-local-gemma4-e2b" "local-gemma4-e2b:latest")
+      (hermesLauncher "hermes-local-gemma4-e4b" "local-gemma4-e4b:latest")
+      (hermesLauncher "hermes-local-gemma4-12b" "local-gemma4-12b:latest")
       (openCodeLauncher "opencode-local" "nix-local/local-coder:latest")
       (openCodeLauncher "opencode-local-fast" "nix-local/local-fast:latest")
       (openCodeLauncher "opencode-local-deepseek" "nix-local/local-deepseek-coder:latest")
@@ -198,6 +215,15 @@ in
     environment.etc."nix-ai-setup/hermes.yaml".source = hermesConfig;
     environment.etc."nix-ai-setup/opencode.json".source = openCodeConfig;
     programs.zsh.shellAliases = {
+      hermes-coder = "hermes-local";
+      hermes-fast = "hermes-local-fast";
+      hermes-deepseek = "hermes-local-deepseek";
+      hermes-qwen-coder = "hermes-local-qwen-coder";
+      hermes-starcoder = "hermes-local-starcoder";
+      hermes-granite = "hermes-local-granite";
+      hermes-gemma4-e2b = "hermes-local-gemma4-e2b";
+      hermes-gemma4-e4b = "hermes-local-gemma4-e4b";
+      hermes-gemma4-12b = "hermes-local-gemma4-12b";
       ollama-models = ''printf '%s\n' "Model alias                     Source                    Role" "local-coder:latest              qwen3.5:9b                Default for focused coding and tool use; approximately 6.6 GB weights" "local-fast:latest               qwen3.5:4b                Faster small tasks and a fallback if 9B is too slow" "local-deepseek-coder:latest     deepseek-coder-v2:16b     Larger coding-focused MoE model; about 8.9 GB" "local-qwen-coder:latest         qwen2.5-coder:14b         Dedicated code model for refactoring, explanation, and generation; about 9.0 GB" "local-starcoder:latest          starcoder2:instruct       Instruct-tuned StarCoder2 for interactive programming; about 9.1 GB" "local-granite-code:latest       granite-code:8b           Lightweight IBM code model; about 4.6 GB" "local-gemma4-e2b:latest         gemma4:e2b                Compact Gemma 4 variant; about 7.2 GB" "local-gemma4-e4b:latest         gemma4:e4b                Mid-size Gemma 4 variant; about 9.6 GB" "local-gemma4-12b:latest         gemma4:12b                Dense Gemma 4 12B model; about 7.6 GB"'';
       ollama-get-coder = installModel "local-coder" aliases.local-coder;
       ollama-get-fast = installModel "local-fast" aliases.local-fast;
