@@ -39,10 +39,10 @@ EOF
 
 case "${1:-}" in
   list)
-    printf '%-30s %-25s %-10s %s\n' "MODEL ALIAS" "SOURCE" "CONTEXT" "ROLE"
+    printf '%-30s %-25s %-10s %-6s %s\n' "MODEL ALIAS" "SOURCE" "CONTEXT" "TOOLS" "ROLE"
     for row in "${UBUNTU_AI_MODELS[@]}"; do
-      IFS='|' read -r alias source context role <<<"$row"
-      printf '%-30s %-25s %-10s %s\n' "$alias:latest" "$source" "$context" "$role"
+      IFS='|' read -r alias source context tools role <<<"$row"
+      printf '%-30s %-25s %-10s %-6s %s\n' "$alias:latest" "$source" "$context" "$tools" "$role"
     done
     ;;
   install)
