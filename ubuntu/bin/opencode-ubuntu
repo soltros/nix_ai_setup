@@ -12,13 +12,13 @@ context="$(model_field "$model" context)"
 export OPENCODE_CONFIG_CONTENT="$(cat <<EOF
 {
   "\$schema": "https://opencode.ai/config.json",
-  "model": "nix-local/$model:latest",
+  "model": "ubuntu-local/$model:latest",
   "small_model": "nix-local/local-fast:latest",
-  "enabled_providers": ["nix-local"],
+  "enabled_providers": ["ubuntu-local"],
   "autoupdate": false,
   "share": "disabled",
   "provider": {
-    "nix-local": {
+    "ubuntu-local": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "Local NVIDIA GPU (bounded)",
       "options": {
