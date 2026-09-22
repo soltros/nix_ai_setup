@@ -13,7 +13,7 @@ export OPENCODE_CONFIG_CONTENT="$(cat <<EOF
 {
   "\$schema": "https://opencode.ai/config.json",
   "model": "ubuntu-local/$model:latest",
-  "small_model": "nix-local/local-fast:latest",
+  "small_model": "ubuntu-local/local-fast:latest",
   "enabled_providers": ["ubuntu-local"],
   "autoupdate": false,
   "share": "disabled",
