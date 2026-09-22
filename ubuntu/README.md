@@ -51,7 +51,7 @@ Install the integration but do not download models yet:
 bash install.sh
 ```
 
-Install the integration plus the core local models, including the default Gemma 4 12B persona model:
+Install the integration plus the core local models, including the default Qwen3.5 9B persona model:
 
 ```bash
 bash install.sh --models core
@@ -158,7 +158,7 @@ This is important for Hermes: `context_length` and `ollama_num_ctx` both match t
 | `local-granite-code:latest` | `granite-code:8b` | 131,072 | 65,536 | no | Lightweight IBM code model; ~4.6 GB |
 | `local-gemma4-e2b:latest` | `gemma4:e2b` | 131,072 | 65,536 | yes | Compact Gemma 4; ~7.2 GB |
 | `local-gemma4-e4b:latest` | `gemma4:e4b` | 131,072 | 65,536 | yes | Mid-size Gemma 4; ~9.6 GB |
-| `local-gemma4-12b:latest` | `gemma4:12b` | 262,144 | 65,536 | yes | Default Hermes persona model; ~7.6 GB |
+| `local-gemma4-12b:latest` | `gemma4:12b` | 262,144 | 65,536 | yes | Optional Hermes/OpenCode model; current Ollama tool-call parsing can be unreliable; ~7.6 GB |
 
 Only one model is configured to stay loaded at once.
 
@@ -232,7 +232,7 @@ Runtime Hermes state lives under:
 ~/.local/state/ubuntu-ai/hermes
 ```
 
-The launcher regenerates `config.yaml` for every run, symlinks the selected SOUL and skin, and sets both `context_length` and `ollama_num_ctx` to the tuned runtime context. Gemma remains the preferred/default persona model, but Hermes automatically falls back to `local-coder:latest` (Qwen3.5 9B) after repeated invalid or empty responses, which works around current Ollama Gemma 4 tool-call parser failures.
+The launcher regenerates `config.yaml` for every run, symlinks the selected SOUL and skin, and sets both `context_length` and `ollama_num_ctx` to the tuned runtime context. Qwen3.5 9B is the default persona model because its Hermes/Ollama tool calling is reliable. Gemma 4 remains available through the explicit `*-gemma4-*` aliases, but it is optional because current Ollama Gemma 4 tool-call parsing can return unusable empty responses.
 
 Hermes and OpenCode agent launchers are intentionally limited to models that advertise native tool calling in Ollama. DeepSeek Coder V2, StarCoder2, and Granite Code remain available for direct coding/chat through:
 
@@ -284,9 +284,9 @@ rasputin-gemma4-12b
 You can also bypass aliases:
 
 ```bash
-hermes-ubuntu durandal local-gemma4-12b
-hermes-ubuntu guilty-spark local-gemma4-12b
-hermes-ubuntu rasputin local-gemma4-12b
+hermes-ubuntu durandal local-coder
+hermes-ubuntu guilty-spark local-coder
+hermes-ubuntu rasputin local-coder
 ```
 
 Any extra arguments are passed to Hermes.
