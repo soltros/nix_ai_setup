@@ -64,6 +64,7 @@ let
         provider = "main";
       });
       fallback_providers = [ ];
+      display.skin = "durandal-marathon";
     };
   hermesConfig = hermesConfigFor "hermes-local" "local-coder:latest";
   openCodeConfigFor = model: {
@@ -135,10 +136,27 @@ let
       inherit name;
       runtimeInputs = [ pkgs.coreutils ];
       text = ''
+        durandal_home=/var/lib/hermes/.hermes
+        durandal_soul="$durandal_home/SOUL.md"
+        durandal_skin="$durandal_home/skins/durandal-marathon.yaml"
+
+        if [ ! -r "$durandal_soul" ] || [ ! -r "$durandal_skin" ]; then
+          echo "nix-ai-setup: Durandal Hermes assets are missing." >&2
+          echo "Expected SOUL.md and durandal-marathon.yaml from modules/durandal-hermes-skin.nix." >&2
+          exit 1
+        fi
+
         export HERMES_HOME="''${XDG_STATE_HOME:-$HOME/.local/state}/nix-ai-setup/hermes"
-        mkdir -p "$HERMES_HOME"
+        mkdir -p "$HERMES_HOME/skins"
         cp ${runtimeConfig} "$HERMES_HOME/config.yaml"
         chmod 600 "$HERMES_HOME/config.yaml"
+
+        # The nixos-config Durandal module is the sole authority for personality
+        # and terminal skin. Never copy these files: symlink the live declarative
+        # artifacts so every local-model launcher always uses the same SOUL/skin.
+        ln -sfn "$durandal_soul" "$HERMES_HOME/SOUL.md"
+        ln -sfn "$durandal_skin" "$HERMES_HOME/skins/durandal-marathon.yaml"
+
         export OPENAI_API_KEY=ollama
         export OPENAI_BASE_URL=${endpoint}/v1
         export HERMES_API_TIMEOUT=${toString cfg.requestTimeout}
