@@ -11,6 +11,10 @@ let
   aliases = {
     local-coder = "qwen3.5:9b";
     local-fast = "qwen3.5:4b";
+    local-deepseek-coder = "deepseek-coder-v2:16b";
+    local-qwen-coder = "qwen2.5-coder:14b";
+    local-starcoder = "starcoder2:instruct";
+    local-granite-code = "granite-code:8b";
   };
   modelfile =
     name: source:
@@ -73,7 +77,14 @@ let
         headerTimeout = (cfg.requestTimeout + 10) * 1000;
         chunkTimeout = (cfg.requestTimeout + 10) * 1000;
       };
-      models = lib.genAttrs [ "local-coder:latest" "local-fast:latest" ] (name: {
+      models = lib.genAttrs [
+        "local-coder:latest"
+        "local-fast:latest"
+        "local-deepseek-coder:latest"
+        "local-qwen-coder:latest"
+        "local-starcoder:latest"
+        "local-granite-code:latest"
+      ] (name: {
         inherit name;
         limit = {
           context = cfg.contextLength;
@@ -170,13 +181,28 @@ in
       hermesLocal
       (openCodeLauncher "opencode-local" "nix-local/local-coder:latest")
       (openCodeLauncher "opencode-local-fast" "nix-local/local-fast:latest")
+      (openCodeLauncher "opencode-local-deepseek" "nix-local/local-deepseek-coder:latest")
+      (openCodeLauncher "opencode-local-qwen-coder" "nix-local/local-qwen-coder:latest")
+      (openCodeLauncher "opencode-local-starcoder" "nix-local/local-starcoder:latest")
+      (openCodeLauncher "opencode-local-granite" "nix-local/local-granite-code:latest")
     ];
     environment.etc."nix-ai-setup/hermes.yaml".source = hermesConfig;
     environment.etc."nix-ai-setup/opencode.json".source = openCodeConfig;
     programs.zsh.shellAliases = {
       ollama-get-coder = installModel "local-coder" aliases.local-coder;
       ollama-get-fast = installModel "local-fast" aliases.local-fast;
-      ollama-get-models = "${installModel "local-coder" aliases.local-coder} && ${installModel "local-fast" aliases.local-fast}";
+      ollama-get-deepseek-coder = installModel "local-deepseek-coder" aliases.local-deepseek-coder;
+      ollama-get-qwen-coder = installModel "local-qwen-coder" aliases.local-qwen-coder;
+      ollama-get-starcoder = installModel "local-starcoder" aliases.local-starcoder;
+      ollama-get-granite-code = installModel "local-granite-code" aliases.local-granite-code;
+      ollama-get-models = lib.concatStringsSep " && " [
+        (installModel "local-coder" aliases.local-coder)
+        (installModel "local-fast" aliases.local-fast)
+        (installModel "local-deepseek-coder" aliases.local-deepseek-coder)
+        (installModel "local-qwen-coder" aliases.local-qwen-coder)
+        (installModel "local-starcoder" aliases.local-starcoder)
+        (installModel "local-granite-code" aliases.local-granite-code)
+      ];
     };
     systemd.services.nix-ai-gateway = {
       description = "Bounded local AI endpoint for Alpaca and agents";
