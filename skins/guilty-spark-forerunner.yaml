@@ -1,0 +1,74 @@
+name: guilty-spark-forerunner
+description: Forerunner terminal skin for the 343 Guilty Spark Hermes persona
+
+colors:
+  background: "#0b0e10"
+  banner_border: "#4A4E54"
+  banner_title: "#00E5FF"
+  banner_accent: "#C5C7C4"
+  banner_dim: "#0099FF"
+  banner_text: "#C5C7C4"
+  ui_accent: "#00E5FF"
+  ui_label: "#C5C7C4"
+  ui_ok: "#00E5FF"
+  ui_error: "#FF1122"
+  ui_warn: "#FF1122"
+  ui_tool: "#0099FF"
+  ui_thinking: "#8E9398"
+  diff_added: "#0b3138"
+  diff_removed: "#3a0b0e"
+  diff_added_word: "#00E5FF"
+  diff_removed_word: "#FF1122"
+  syntax_string: "#00E5FF"
+  syntax_number: "#C5C7C4"
+  syntax_keyword: "#0099FF"
+  syntax_comment: "#8E9398"
+  prompt: "#00E5FF"
+  input_rule: "#4A4E54"
+  response_border: "#0099FF"
+  status_bar_bg: "#15191d"
+  status_bar_text: "#C5C7C4"
+  status_bar_strong: "#00E5FF"
+  status_bar_dim: "#8E9398"
+  status_bar_good: "#00E5FF"
+  status_bar_warn: "#FF1122"
+  status_bar_bad: "#FF1122"
+  status_bar_critical: "#FF1122"
+  session_label: "#C5C7C4"
+  session_border: "#0099FF"
+  completion_menu_bg: "#111518"
+  completion_menu_current_bg: "#19343a"
+  completion_menu_meta_bg: "#4A4E54"
+  completion_menu_meta_current_bg: "#234c55"
+  voice_status_bg: "#15191d"
+  selection_bg: "#19343a"
+
+branding:
+  agent_name: "343 GUILTY SPARK"
+  welcome: "Installation monitor online. Reclaimer authorization acknowledged."
+  goodbye: "Monitoring cycle complete. Installation state preserved."
+  response_label: " MONITOR "
+  prompt_symbol: "◉"
+  help_header: "Installation 04 monitor command index"
+
+spinner:
+  waiting_faces: [ "◉", "◎", "⊙" ]
+  thinking_faces: [ "◉", "⊙", "◎" ]
+  thinking_verbs:
+    - "cataloguing"
+    - "calibrating"
+    - "verifying protocol"
+    - "mapping containment"
+  wings:
+    - ["<", ">"]
+    - ["[", "]"]
+
+tool_prefix: "│"
+
+banner_logo: |-
+  [#C5C7C4]FORERUNNER INSTALLATION MONITOR // ACCESS CHANNEL 343[/]
+  [#4A4E54]────────────────────────────────────────────────────────────────────────────────[/]
+
+banner_hero: |
+  [bold #00E5FF]                3 4 3   G U I L T Y   S P A R K               [/]
+  [#0099FF]                Installation Monitor // Protocol Active[/]
