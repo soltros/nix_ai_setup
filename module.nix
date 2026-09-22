@@ -382,6 +382,27 @@ opencode-local-gemma4-e2b  Gemma 4 E2B
 opencode-local-gemma4-e4b  Gemma 4 E4B
 opencode-local-gemma4-12b  Gemma 4 12B
 
+OPENCODE BEHAVIOR
+Installed by               nix_ai_setup
+Provider                   nix-local
+Endpoint                   http://127.0.0.1:11435/v1
+Provider enforcement       forced by OPENCODE_CONFIG_CONTENT
+Project config override    cannot silently switch these launchers to cloud
+Build agent max steps      12
+Plan agent max steps       12
+Task delegation            disabled
+Sharing                    disabled
+OpenCode autoupdate        disabled; package updates come from Nix
+Small model                local-fast:latest / Qwen3.5 4B
+Normal opencode command    untouched; keeps normal user providers/config
+Plugin suite               enabled on every local OpenCode launcher
+
+Only models with native Ollama tool calling are exposed as OpenCode agents.
+DeepSeek Coder V2, StarCoder2, and Granite Code remain available through:
+  deepseek-chat
+  starcoder-chat
+  granite-chat
+
 HERMES — DURANDAL
 hermes-coder               Qwen3.5 9B
 hermes-fast                Qwen3.5 4B
