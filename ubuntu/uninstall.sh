@@ -11,7 +11,7 @@ sudo rmdir /etc/systemd/system/ollama.service.d 2>/dev/null || true
 sudo systemctl daemon-reload
 sudo systemctl restart ollama 2>/dev/null || true
 
-for cmd in ubuntu-ai-model ubuntu-ai-help ubuntu-ai-diagnose hermes-ubuntu opencode-ubuntu; do
+for cmd in nixai ubuntu-ai-model ubuntu-ai-help ubuntu-ai-diagnose hermes-ubuntu opencode-ubuntu; do
   sudo rm -f "/usr/local/bin/$cmd"
 done
 
