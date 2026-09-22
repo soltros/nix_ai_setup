@@ -10,8 +10,12 @@ Prepared for a Ryzen 5 5600X (6 cores / 12 threads), 32 GB RAM, and a **12 GiB A
 | --- | --- | --- |
 | `local-coder:latest` | `qwen3.5:9b` | Default for focused coding and tool use; approximately 6.6 GB weights |
 | `local-fast:latest` | `qwen3.5:4b` | Faster small tasks and a fallback if 9B is too slow |
+| `local-deepseek-coder:latest` | `deepseek-coder-v2:16b` | Larger coding-focused MoE model; about 8.9 GB |
+| `local-qwen-coder:latest` | `qwen2.5-coder:14b` | Dedicated code model for refactoring, explanation, and generation; about 9.0 GB |
+| `local-starcoder:latest` | `starcoder2:instruct` | Instruct-tuned StarCoder2 for interactive programming; about 9.1 GB |
+| `local-granite-code:latest` | `granite-code:8b` | Lightweight IBM code model; about 4.6 GB |
 
-These are hardware-informed starting choices, **not benchmarked winners**. Allow roughly 11 GB for model downloads, plus Nix package storage. Only one model is loaded at a time. A 16,384-token context and Q8 KV cache leave room for desktop graphics and runtime buffers. Actual GPU residency must be checked after activation. Larger 27B/30B models risk substantial CPU offload on this card; they are not included by default.
+These are hardware-informed starting choices, **not benchmarked winners**. The complete set requires substantially more than 11 GB of disk space, although only one model is loaded into memory at a time. A 16,384-token context and Q8 KV cache leave room for desktop graphics and runtime buffers. Actual GPU residency must be checked after activation. Larger 27B/30B models risk substantial CPU offload on this card; they are not included by default.
 
 Small local models will still make mistakes on complex repository tasks. Disabling thinking trades some difficult reasoning performance for direct responses. Start with one focused edit, inspect the diff, and run its relevant test.
 
@@ -40,9 +44,13 @@ If cloning a private repository, use `git+ssh://git@github.com/soltros/nix_ai_se
 Model downloads are explicit so rebuilding never starts a large network transfer. After activation, open a new Zsh session and choose one of these aliases:
 
 ```sh
-ollama-get-coder   # Qwen3.5 9B and the local-coder alias
-ollama-get-fast    # Qwen3.5 4B and the local-fast alias
-ollama-get-models  # both, sequentially
+ollama-get-coder            # Qwen3.5 9B
+ollama-get-fast             # Qwen3.5 4B
+ollama-get-deepseek-coder   # DeepSeek Coder V2 16B
+ollama-get-qwen-coder       # Qwen2.5-Coder 14B
+ollama-get-starcoder        # StarCoder2 Instruct
+ollama-get-granite-code     # Granite Code 8B
+ollama-get-models           # install every configured model, sequentially
 ollama list
 ```
 
@@ -56,7 +64,7 @@ The aliases first pull the upstream model and then create the tuned local alias 
 
 **Hermes Desktop / another Hermes profile:** select a custom OpenAI-compatible provider with the settings below. `/etc/nix-ai-setup/hermes.yaml` contains the complete example, including `agent.max_turns = 12`. Selecting just the endpoint does not apply the profile's step limit.
 
-**OpenCode:** installed by this module. Run `opencode-local` for the 9B coding model or `opencode-local-fast` for the faster 4B model. Both commands force the bounded local provider even when a repository contains its own OpenCode configuration, cap build/plan agents at 12 steps, disable task delegation, disable sharing, and leave automatic package updates to Nix. Normal `opencode` retains your normal configuration and providers.
+**OpenCode:** installed by this module. Run `opencode-local` for Qwen3.5 9B, `opencode-local-fast` for Qwen3.5 4B, `opencode-local-deepseek` for DeepSeek Coder V2 16B, `opencode-local-qwen-coder` for Qwen2.5-Coder 14B, `opencode-local-starcoder` for StarCoder2 Instruct, or `opencode-local-granite` for Granite Code 8B. Both commands force the bounded local provider even when a repository contains its own OpenCode configuration, cap build/plan agents at 12 steps, disable task delegation, disable sharing, and leave automatic package updates to Nix. Normal `opencode` retains your normal configuration and providers.
 
 For a one-shot task, use either launcher exactly like regular OpenCode:
 
@@ -73,7 +81,7 @@ The generated configuration remains available at `/etc/nix-ai-setup/opencode.jso
 | --- | --- |
 | API base URL | `http://127.0.0.1:11435/v1` |
 | API key, if required | `ollama` (placeholder; no cloud key needed) |
-| Model | `local-coder:latest` or `local-fast:latest` |
+| Model | Any configured local alias, such as `local-coder:latest`, `local-deepseek-coder:latest`, or `local-granite-code:latest` |
 | Context window | `16384` |
 | Maximum output | `4096` |
 
@@ -127,6 +135,10 @@ See `VALIDATION.md` for checks performed before the initial commit. The authorin
 ## Sources
 
 - [Qwen3.5 9B model and size](https://ollama.com/library/qwen3.5:9b)
+- [DeepSeek Coder V2](https://ollama.com/library/deepseek-coder-v2)
+- [Qwen2.5-Coder](https://ollama.com/library/qwen2.5-coder)
+- [StarCoder2](https://ollama.com/library/starcoder2)
+- [Granite Code](https://ollama.com/library/granite-code)
 - [Qwen3.5 model card and non-thinking sampling guidance](https://huggingface.co/Qwen/Qwen3.5-9B)
 - [Ollama Vulkan support](https://docs.ollama.com/gpu)
 - [Ollama OpenAI-compatible API](https://docs.ollama.com/api/openai-compatibility)
