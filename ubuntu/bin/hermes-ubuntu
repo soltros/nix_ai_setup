@@ -50,6 +50,7 @@ model:
   api_key: ollama
   context_length: $runtime_context
   ollama_num_ctx: $runtime_context
+  max_tokens: 16384
 agent:
   max_turns: 12
   api_max_retries: 1
