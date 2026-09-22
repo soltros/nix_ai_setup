@@ -7,6 +7,11 @@ source "$ROOT/lib/models.sh"
 model="${1:-local-coder}"
 shift $(( $# >= 1 ? 1 : 0 ))
 model_exists "$model" || { echo "Unknown model alias: $model" >&2; exit 2; }
+[[ "$(model_field "$model" tools)" == "yes" ]] || {
+  echo "Model $model does not advertise native tool calling in Ollama and cannot be used as an OpenCode agent model." >&2
+  echo "Use it directly with: ollama run $model:latest" >&2
+  exit 2
+}
 context="$(model_field "$model" context)"
 
 export OPENCODE_CONFIG_CONTENT="$(cat <<EOF
@@ -37,21 +42,9 @@ export OPENCODE_CONFIG_CONTENT="$(cat <<EOF
           "name": "local-fast:latest",
           "limit": {"context": 262144, "output": 4096}
         },
-        "local-deepseek-coder:latest": {
-          "name": "local-deepseek-coder:latest",
-          "limit": {"context": 163840, "output": 4096}
-        },
         "local-qwen-coder:latest": {
           "name": "local-qwen-coder:latest",
           "limit": {"context": 32768, "output": 4096}
-        },
-        "local-starcoder:latest": {
-          "name": "local-starcoder:latest",
-          "limit": {"context": 16384, "output": 4096}
-        },
-        "local-granite-code:latest": {
-          "name": "local-granite-code:latest",
-          "limit": {"context": 131072, "output": 4096}
         },
         "local-gemma4-e2b:latest": {
           "name": "local-gemma4-e2b:latest",
