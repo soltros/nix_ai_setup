@@ -109,14 +109,34 @@ rasputin-gemma4-12b
 
 Every launcher is fail-closed: it requires the selected persona's declarative `SOUL.md` and skin under `/var/lib/hermes/.hermes/personas/` and `/var/lib/hermes/.hermes/skins/`. The persona directories are canonical; normal Hermes keeps Durandal as the system-wide default by pointing `/var/lib/hermes/.hermes/SOUL.md` at `/var/lib/hermes/.hermes/personas/durandal/SOUL.md`. The launcher symlinks the selected canonical persona asset into its runtime home and sets the matching `display.skin`.
 
-For a compact terminal reference, run either:
+For the complete local-AI reference, run:
+
+```sh
+nixai --help
+```
+
+It prints all configured models, source tags, context windows, tool support, sampling parameters, Ollama/gateway limits, OpenCode aliases, Hermes persona aliases, direct chat-only aliases, model-management commands, and persona/skin mappings.
+
+The older helpers remain as compatibility aliases:
 
 ```sh
 ollama-models
 hermes-help
 ```
 
-That help output shows the full model alias/source/role table, the three available personas and their skins, and the complete Durandal, Guilty Spark, and Rasputin launcher aliases.
+Both now call `nixai --help`.
+
+### OpenCode memory plugin
+
+Every generated local OpenCode launcher enables [`opencode-mem`](https://github.com/tickernelz/opencode-mem) through OpenCode's native v2 plugin list:
+
+```json
+{
+  "plugins": ["opencode-mem"]
+}
+```
+
+OpenCode downloads the published plugin package automatically on first startup. The launcher also seeds `~/.config/opencode/opencode-mem.jsonc` only when that file does not already exist, so later user customization is preserved. The default configuration keeps memory local at `~/.opencode-mem/data`, binds the web UI to `127.0.0.1:4747`, enables auto-capture, and uses the local `nix-local` provider with `opencodeModel = "inherit"` so capture follows the active tool-capable OpenCode model. Manual memory operations remain available even if automatic capture cannot produce structured output.
 
 **Hermes Desktop / another Hermes profile:** select a custom OpenAI-compatible provider with the settings below. `/etc/nix-ai-setup/hermes.yaml` contains the complete example, including `agent.max_turns = 12`. Selecting just the endpoint does not apply the profile's step limit.
 
