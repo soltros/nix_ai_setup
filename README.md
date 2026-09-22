@@ -6,19 +6,19 @@ NixOS flake module providing Nixpkgs **Alpaca**, Vulkan-accelerated **Ollama**, 
 
 Prepared for a Ryzen 5 5600X (6 cores / 12 threads), 32 GB RAM, and a **12 GiB AMD Navi 22 GPU**. PCI device `1002:73df`, subsystem `148c:2410`; the exact retail card name was not established. Vulkan avoids depending on an unsupported ROCm GPU override.
 
-| Model alias | Source | Role |
-| --- | --- | --- |
-| `local-coder:latest` | `qwen3.5:9b` | Default for focused coding and tool use; approximately 6.6 GB weights |
-| `local-fast:latest` | `qwen3.5:4b` | Faster small tasks and a fallback if 9B is too slow |
-| `local-deepseek-coder:latest` | `deepseek-coder-v2:16b` | Larger coding-focused MoE model; about 8.9 GB |
-| `local-qwen-coder:latest` | `qwen2.5-coder:14b` | Dedicated code model for refactoring, explanation, and generation; about 9.0 GB |
-| `local-starcoder:latest` | `starcoder2:instruct` | Instruct-tuned StarCoder2 for interactive programming; about 9.1 GB |
-| `local-granite-code:latest` | `granite-code:8b` | Lightweight IBM code model; about 4.6 GB |
-| `local-gemma4-e2b:latest` | `gemma4:e2b` | Compact Gemma 4 variant; about 7.2 GB |
-| `local-gemma4-e4b:latest` | `gemma4:e4b` | Mid-size Gemma 4 variant; about 9.6 GB |
-| `local-gemma4-12b:latest` | `gemma4:12b` | Dense Gemma 4 12B model; about 7.6 GB |
+| Model alias | Source | Native context | Role |
+| --- | --- | ---: | --- |
+| `local-coder:latest` | `qwen3.5:9b` | 262,144 | Default for focused coding and tool use; approximately 6.6 GB weights |
+| `local-fast:latest` | `qwen3.5:4b` | 262,144 | Faster small tasks and a fallback if 9B is too slow |
+| `local-deepseek-coder:latest` | `deepseek-coder-v2:16b` | 163,840 | Larger coding-focused MoE model; about 8.9 GB |
+| `local-qwen-coder:latest` | `qwen2.5-coder:14b` | 32,768 | Dedicated code model for refactoring, explanation, and generation; about 9.0 GB |
+| `local-starcoder:latest` | `starcoder2:instruct` | 16,384 | Instruct-tuned StarCoder2 for interactive programming; about 9.1 GB |
+| `local-granite-code:latest` | `granite-code:8b` | 131,072 | Lightweight IBM code model; about 4.6 GB |
+| `local-gemma4-e2b:latest` | `gemma4:e2b` | 131,072 | Compact Gemma 4 variant; about 7.2 GB |
+| `local-gemma4-e4b:latest` | `gemma4:e4b` | 131,072 | Mid-size Gemma 4 variant; about 9.6 GB |
+| `local-gemma4-12b:latest` | `gemma4:12b` | 262,144 | Dense Gemma 4 12B model; about 7.6 GB |
 
-These are hardware-informed starting choices, **not benchmarked winners**. The complete set requires substantially more than 11 GB of disk space, although only one model is loaded into memory at a time. A 16,384-token context and Q8 KV cache leave room for desktop graphics and runtime buffers. Actual GPU residency must be checked after activation. Larger 27B/30B models risk substantial CPU offload on this card; they are not included by default.
+These are hardware-informed starting choices, **not benchmarked winners**. The complete set requires substantially more than 11 GB of disk space, although only one model is loaded into memory at a time. Each tuned Ollama alias now uses the model's own native context window, and Hermes/OpenCode are generated with that same value so clients do not accidentally clamp or misreport context. Q8 KV cache is still used to reduce runtime memory pressure. Actual GPU residency must be checked after activation. Larger 27B/30B models risk substantial CPU offload on this card; they are not included by default.
 
 Small local models will still make mistakes on complex repository tasks. Disabling thinking trades some difficult reasoning performance for direct responses. Start with one focused edit, inspect the diff, and run its relevant test.
 
@@ -165,13 +165,13 @@ Optional tuning in your host configuration:
 ```nix
 services.nix-ai-setup = {
   enable = true;
-  contextLength = 16384;
+  contextLength = 262144; # Ollama fallback; local aliases use per-model native contexts
   maxTokens = 4096;
   requestTimeout = 180;
 };
 ```
 
-If long outputs truncate, raise `maxTokens` modestly. If prefill times out, first reduce the enabled tools or task size. Raising context increases memory use; check GPU residency before doing so.
+If long outputs truncate, raise `maxTokens` modestly. If prefill times out, first reduce the enabled tools or task size. The local aliases no longer share one context limit: each model uses its declared native window in the Modelfile, Hermes config, and OpenCode config. Larger active context still increases KV-cache memory use, so check GPU residency during long sessions.
 
 ## Triage together
 
