@@ -143,7 +143,7 @@ let
       fallback_providers = [ ];
       display.skin = skin;
     };
-  hermesConfig = hermesConfigFor "hermes-local" "local-coder:latest" "durandal-marathon";
+  hermesConfig = hermesConfigFor "hermes-local" "local-gemma4-12b:latest" "durandal-marathon";
   openCodeConfigFor = model: {
     "$schema" = "https://opencode.ai/config.json";
     inherit model;
@@ -302,7 +302,7 @@ EOF
   hermesDurandal = name: model: hermesLauncher name model "durandal" "durandal-marathon";
   hermesSpark = name: model: hermesLauncher name model "guilty-spark" "guilty-spark-forerunner";
   hermesRasputin = name: model: hermesLauncher name model "rasputin" "rasputin-ikelos";
-  hermesLocal = hermesDurandal "hermes-local" "local-coder:latest";
+  hermesLocal = hermesDurandal "hermes-local" "local-gemma4-12b:latest";
 
   hermesSetup = pkgs.writeShellApplication {
     name = "hermes-setup";
@@ -374,6 +374,7 @@ EOF
       echo
       echo "Hermes persona assets are ready."
       echo "Default persona: Durandal"
+      echo "Default persona model: Gemma 4 12B"
       echo "Try: spark"
       echo "Try: rasputin"
     '';
@@ -478,7 +479,7 @@ Minimum required by Hermes 64000 tokens
 32K Qwen2.5-Coder          OpenCode/direct only; not exposed through Hermes
 
 HERMES — DURANDAL
-durandal                   Qwen3.5 9B
+durandal                   Gemma 4 12B (default)
 durandal-fast              Qwen3.5 4B
 durandal-gemma4-e2b        Gemma 4 E2B
 durandal-gemma4-e4b        Gemma 4 E4B
@@ -492,14 +493,14 @@ hermes-gemma4-e4b          Gemma 4 E4B
 hermes-gemma4-12b          Gemma 4 12B
 
 HERMES — 343 GUILTY SPARK
-spark                      Qwen3.5 9B
+spark                      Gemma 4 12B (default)
 spark-fast                 Qwen3.5 4B
 spark-gemma4-e2b           Gemma 4 E2B
 spark-gemma4-e4b           Gemma 4 E4B
 spark-gemma4-12b           Gemma 4 12B
 
 HERMES — RASPUTIN
-rasputin                   Qwen3.5 9B
+rasputin                   Gemma 4 12B (default)
 rasputin-fast              Qwen3.5 4B
 rasputin-gemma4-e2b        Gemma 4 E2B
 rasputin-gemma4-e4b        Gemma 4 E4B
@@ -600,6 +601,7 @@ in
       ollamaSyncContexts
       hermesSetup
       hermesLocal
+      (hermesDurandal "hermes-local-coder" "local-coder:latest")
       (hermesDurandal "hermes-local-fast" "local-fast:latest")
       (hermesDurandal "hermes-local-gemma4-e2b" "local-gemma4-e2b:latest")
       (hermesDurandal "hermes-local-gemma4-e4b" "local-gemma4-e4b:latest")
@@ -635,19 +637,19 @@ in
       durandal-gemma4-12b = "hermes-local-gemma4-12b";
 
       # Backward-compatible Durandal aliases.
-      hermes-coder = "hermes-local";
+      hermes-coder = "hermes-local-coder";
       hermes-fast = "hermes-local-fast";
       hermes-gemma4-e2b = "hermes-local-gemma4-e2b";
       hermes-gemma4-e4b = "hermes-local-gemma4-e4b";
       hermes-gemma4-12b = "hermes-local-gemma4-12b";
 
-      spark = "hermes-guilty-spark";
+      spark = "hermes-guilty-spark-gemma4-12b";
       spark-fast = "hermes-guilty-spark-fast";
       spark-gemma4-e2b = "hermes-guilty-spark-gemma4-e2b";
       spark-gemma4-e4b = "hermes-guilty-spark-gemma4-e4b";
       spark-gemma4-12b = "hermes-guilty-spark-gemma4-12b";
 
-      rasputin = "hermes-rasputin";
+      rasputin = "hermes-rasputin-gemma4-12b";
       rasputin-fast = "hermes-rasputin-fast";
       rasputin-gemma4-e2b = "hermes-rasputin-gemma4-e2b";
       rasputin-gemma4-e4b = "hermes-rasputin-gemma4-e4b";
