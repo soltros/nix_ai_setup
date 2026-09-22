@@ -83,6 +83,8 @@ hermes-gemma4-12b
 
 These aliases map to the corresponding `hermes-local-*` launchers, so you can still invoke the full command names directly if desired.
 
+All local Hermes launchers require the Durandal assets managed by `~/nixos-config/modules/durandal-hermes-skin.nix`. They use the declarative `/var/lib/hermes/.hermes/SOUL.md` and `/var/lib/hermes/.hermes/skins/durandal-marathon.yaml` via symlinks and force `display.skin = "durandal-marathon"`. If either asset is missing or unreadable, the launcher exits instead of starting Hermes without the Durandal persona.
+
 **Hermes Desktop / another Hermes profile:** select a custom OpenAI-compatible provider with the settings below. `/etc/nix-ai-setup/hermes.yaml` contains the complete example, including `agent.max_turns = 12`. Selecting just the endpoint does not apply the profile's step limit.
 
 **OpenCode:** installed by this module. Run `opencode-local` for Qwen3.5 9B, `opencode-local-fast` for Qwen3.5 4B, `opencode-local-deepseek` for DeepSeek Coder V2 16B, `opencode-local-qwen-coder` for Qwen2.5-Coder 14B, `opencode-local-starcoder` for StarCoder2 Instruct, `opencode-local-granite` for Granite Code 8B, `opencode-local-gemma4-e2b` for Gemma 4 E2B, `opencode-local-gemma4-e4b` for Gemma 4 E4B, or `opencode-local-gemma4-12b` for Gemma 4 12B. All nine launchers force the bounded local provider even when a repository contains its own OpenCode configuration, cap build/plan agents at 12 steps, disable task delegation, disable sharing, and leave automatic package updates to Nix. Normal `opencode` retains your normal configuration and providers.
