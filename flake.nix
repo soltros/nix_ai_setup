@@ -24,6 +24,15 @@
       openCodeLaunchers = builtins.filter (
         package: nixpkgs.lib.hasPrefix "opencode-local" (nixpkgs.lib.getName package)
       ) testSystem.config.environment.systemPackages;
+      hermesLaunchers = builtins.filter (
+        package:
+        let
+          name = nixpkgs.lib.getName package;
+        in
+        nixpkgs.lib.hasPrefix "hermes-local" name
+        || nixpkgs.lib.hasPrefix "hermes-guilty-spark" name
+        || nixpkgs.lib.hasPrefix "hermes-rasputin" name
+      ) testSystem.config.environment.systemPackages;
     in
     {
       nixosModules.default = import ./module.nix;
@@ -38,10 +47,11 @@
           builtins.unsafeDiscardStringContext testSystem.config.system.build.toplevel.drvPath
         );
         launchers =
-          assert builtins.length openCodeLaunchers == 2;
+          assert builtins.length openCodeLaunchers == 9;
+          assert builtins.length hermesLaunchers == 27;
           pkgs.symlinkJoin {
-            name = "nix-ai-opencode-launchers-check";
-            paths = openCodeLaunchers;
+            name = "nix-ai-launchers-check";
+            paths = openCodeLaunchers ++ hermesLaunchers;
           };
         gateway =
           pkgs.runCommand "nix-ai-gateway-tests"
