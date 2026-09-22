@@ -21,7 +21,7 @@ alias ollama-sync-contexts='ubuntu-ai-model sync'
 alias ollama-sync-model-contexts='ubuntu-ai-model sync'
 
 # Durandal
-alias durandal='hermes-ubuntu durandal local-gemma4-12b'
+alias durandal='hermes-ubuntu durandal local-coder'
 alias durandal-fast='hermes-ubuntu durandal local-fast'
 alias durandal-gemma4-e2b='hermes-ubuntu durandal local-gemma4-e2b'
 alias durandal-gemma4-e4b='hermes-ubuntu durandal local-gemma4-e4b'
@@ -35,14 +35,14 @@ alias hermes-gemma4-e4b='hermes-ubuntu durandal local-gemma4-e4b'
 alias hermes-gemma4-12b='hermes-ubuntu durandal local-gemma4-12b'
 
 # 343 Guilty Spark
-alias spark='hermes-ubuntu guilty-spark local-gemma4-12b'
+alias spark='hermes-ubuntu guilty-spark local-coder'
 alias spark-fast='hermes-ubuntu guilty-spark local-fast'
 alias spark-gemma4-e2b='hermes-ubuntu guilty-spark local-gemma4-e2b'
 alias spark-gemma4-e4b='hermes-ubuntu guilty-spark local-gemma4-e4b'
 alias spark-gemma4-12b='hermes-ubuntu guilty-spark local-gemma4-12b'
 
 # Rasputin
-alias rasputin='hermes-ubuntu rasputin local-gemma4-12b'
+alias rasputin='hermes-ubuntu rasputin local-coder'
 alias rasputin-fast='hermes-ubuntu rasputin local-fast'
 alias rasputin-gemma4-e2b='hermes-ubuntu rasputin local-gemma4-e2b'
 alias rasputin-gemma4-e4b='hermes-ubuntu rasputin local-gemma4-e4b'
