@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="${UBUNTU_AI_ROOT:-/opt/ubuntu-ai}"
+# shellcheck source=/dev/null
+source "$ROOT/lib/models.sh"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ubuntu-ai-model list
+  ubuntu-ai-model install <alias>
+  ubuntu-ai-model install-all
+  ubuntu-ai-model remove <alias>
+EOF
+}
+
+install_one() {
+  local alias="$1" source context tmp
+  model_exists "$alias" || { echo "Unknown model alias: $alias" >&2; exit 2; }
+  source="$(model_field "$alias" source)"
+  context="$(model_field "$alias" context)"
+  tmp="$(mktemp)"
+  trap 'rm -f "$tmp"' RETURN
+  cat >"$tmp" <<EOF
+FROM $source
+PARAMETER num_ctx $context
+PARAMETER num_predict 4096
+PARAMETER temperature 0.7
+PARAMETER top_p 0.8
+PARAMETER top_k 20
+PARAMETER presence_penalty 1.5
+PARAMETER repeat_penalty 1.0
+EOF
+  echo "Pulling $source..."
+  ollama pull "$source"
+  echo "Creating tuned alias $alias:latest with native context $context..."
+  ollama create "$alias" -f "$tmp"
+}
+
+case "${1:-}" in
+  list)
+    printf '%-30s %-25s %-10s %s\n' "MODEL ALIAS" "SOURCE" "CONTEXT" "ROLE"
+    for row in "${UBUNTU_AI_MODELS[@]}"; do
+      IFS='|' read -r alias source context role <<<"$row"
+      printf '%-30s %-25s %-10s %s\n' "$alias:latest" "$source" "$context" "$role"
+    done
+    ;;
+  install)
+    [[ $# -eq 2 ]] || { usage; exit 2; }
+    install_one "$2"
+    ;;
+  install-all)
+    for row in "${UBUNTU_AI_MODELS[@]}"; do
+      IFS='|' read -r alias _ <<<"$row"
+      install_one "$alias"
+    done
+    ;;
+  remove)
+    [[ $# -eq 2 ]] || { usage; exit 2; }
+    model_exists "$2" || { echo "Unknown model alias: $2" >&2; exit 2; }
+    ollama rm "$2:latest"
+    ;;
+  *) usage; exit 2 ;;
+esac
