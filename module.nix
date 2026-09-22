@@ -478,6 +478,13 @@ Minimum required by Hermes 64000 tokens
 32K Qwen2.5-Coder          OpenCode/direct only; not exposed through Hermes
 
 HERMES — DURANDAL
+durandal                   Qwen3.5 9B
+durandal-fast              Qwen3.5 4B
+durandal-gemma4-e2b        Gemma 4 E2B
+durandal-gemma4-e4b        Gemma 4 E4B
+durandal-gemma4-12b        Gemma 4 12B
+
+Backward-compatible aliases:
 hermes-coder               Qwen3.5 9B
 hermes-fast                Qwen3.5 4B
 hermes-gemma4-e2b          Gemma 4 E2B
@@ -621,6 +628,13 @@ in
     programs.zsh.shellAliases = {
       hermes-setup-personas = "hermes-setup";
       ollama-sync-model-contexts = "ollama-sync-contexts";
+      durandal = "hermes-local";
+      durandal-fast = "hermes-local-fast";
+      durandal-gemma4-e2b = "hermes-local-gemma4-e2b";
+      durandal-gemma4-e4b = "hermes-local-gemma4-e4b";
+      durandal-gemma4-12b = "hermes-local-gemma4-12b";
+
+      # Backward-compatible Durandal aliases.
       hermes-coder = "hermes-local";
       hermes-fast = "hermes-local-fast";
       hermes-gemma4-e2b = "hermes-local-gemma4-e2b";
