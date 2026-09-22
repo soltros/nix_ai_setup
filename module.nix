@@ -30,6 +30,19 @@ let
     local-gemma4-e4b = 131072;
     local-gemma4-12b = 262144;
   };
+  runtimeContexts = {
+    # Actual contexts used by the tuned Ollama aliases on a 12 GiB GPU.
+    # Hermes requires >= 64K for tool use, so Hermes-capable models use 65,536.
+    local-coder = 65536;
+    local-fast = 65536;
+    local-deepseek-coder = 65536;
+    local-qwen-coder = 32768;
+    local-starcoder = 16384;
+    local-granite-code = 65536;
+    local-gemma4-e2b = 65536;
+    local-gemma4-e4b = 65536;
+    local-gemma4-12b = 65536;
+  };
   toolCapableModels = [
     "local-coder:latest"
     "local-fast:latest"
@@ -43,18 +56,14 @@ let
     let
       localName = lib.removeSuffix ":latest" (lib.removePrefix "nix-local/" model);
     in
-    modelContexts.${localName};
-  hermesContextForModel = model:
-    let
-      native = contextForModel model;
-    in
-    if native >= 65536 then 65536 else native;
+    runtimeContexts.${localName};
+  hermesContextForModel = model: contextForModel model;
 
   modelfile =
     name: source:
     pkgs.writeText "${name}.Modelfile" ''
       FROM ${source}
-      PARAMETER num_ctx ${toString modelContexts.${name}}
+      PARAMETER num_ctx ${toString runtimeContexts.${name}}
       PARAMETER num_predict ${toString cfg.maxTokens}
       PARAMETER temperature 0.7
       PARAMETER top_p 0.8
@@ -338,16 +347,16 @@ EOF
 NIXAI — local AI command reference
 
 MODELS
-Alias                          Source                    Context   Tools  Role
-local-coder:latest             qwen3.5:9b                262144    yes    Default focused coding/tool model (~6.6 GB)
-local-fast:latest              qwen3.5:4b                262144    yes    Faster fallback/small-task model
-local-deepseek-coder:latest    deepseek-coder-v2:16b     163840    no     Coding/chat-only MoE model (~8.9 GB)
-local-qwen-coder:latest        qwen2.5-coder:14b         32768     yes    OpenCode/direct coding model; below Hermes 64K minimum (~9.0 GB)
-local-starcoder:latest         starcoder2:instruct       16384     no     Coding/chat-only instruct model (~9.1 GB)
-local-granite-code:latest      granite-code:8b           131072    no     Lightweight coding/chat-only model (~4.6 GB)
-local-gemma4-e2b:latest        gemma4:e2b                131072    yes    Compact Gemma 4 (~7.2 GB)
-local-gemma4-e4b:latest        gemma4:e4b                131072    yes    Mid-size Gemma 4 (~9.6 GB)
-local-gemma4-12b:latest        gemma4:12b                262144    yes    Gemma 4 12B (~7.6 GB)
+Alias                          Source                    Native   Runtime  Tools  Role
+local-coder:latest             qwen3.5:9b                262144   65536    yes    Default focused coding/tool model (~6.6 GB)
+local-fast:latest              qwen3.5:4b                262144   65536    yes    Faster fallback/small-task model
+local-deepseek-coder:latest    deepseek-coder-v2:16b     163840   65536    no     Coding/chat-only MoE model (~8.9 GB)
+local-qwen-coder:latest        qwen2.5-coder:14b         32768    32768    yes    OpenCode/direct coding model; below Hermes 64K minimum (~9.0 GB)
+local-starcoder:latest         starcoder2:instruct       16384    16384    no     Coding/chat-only instruct model (~9.1 GB)
+local-granite-code:latest      granite-code:8b           131072   65536    no     Lightweight coding/chat-only model (~4.6 GB)
+local-gemma4-e2b:latest        gemma4:e2b                131072   65536    yes    Compact Gemma 4 (~7.2 GB)
+local-gemma4-e4b:latest        gemma4:e4b                131072   65536    yes    Mid-size Gemma 4 (~9.6 GB)
+local-gemma4-12b:latest        gemma4:12b                262144   65536    yes    Gemma 4 12B (~7.6 GB)
 
 MODEL PARAMETERS
 num_predict              ${toString cfg.maxTokens}
@@ -495,8 +504,8 @@ in
     enable = lib.mkEnableOption "Alpaca and bounded local AI for a 12 GiB AMD GPU";
     contextLength = lib.mkOption {
       type = lib.types.ints.positive;
-      default = 262144;
-      description = "Maximum Ollama fallback context. Configured local model aliases use their native per-model context windows.";
+      default = 65536;
+      description = "Ollama fallback runtime context. Tuned local aliases use explicit per-model runtime contexts.";
     };
     maxTokens = lib.mkOption {
       type = lib.types.ints.positive;
