@@ -141,7 +141,18 @@ let
       auxiliary = lib.genAttrs [ "compression" "title_generation" "tool_selection" ] (_: {
         provider = "main";
       });
-      fallback_providers = [ ];
+      fallback_providers =
+        if model == "local-coder:latest" then
+          [ ]
+        else
+          [
+            {
+              provider = "custom";
+              model = "local-coder:latest";
+              base_url = "${endpoint}/v1";
+              api_key = "ollama";
+            }
+          ];
       display.skin = skin;
     };
   hermesConfig = hermesConfigFor "hermes-local" "local-gemma4-12b:latest" "durandal-marathon";
@@ -480,6 +491,8 @@ Ollama runtime context     65536 tokens for every Hermes-capable model
 Hermes context_length      65536 tokens
 Hermes ollama_num_ctx      65536 tokens
 Hermes max_tokens          ${toString cfg.hermesMaxTokens}
+Fallback model             local-coder:latest / Qwen3.5 9B
+Fallback trigger           after Hermes exhausts invalid/empty-response retries
 Minimum required by Hermes 64000 tokens
 32K Qwen2.5-Coder          OpenCode/direct only; not exposed through Hermes
 
