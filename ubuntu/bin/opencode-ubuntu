@@ -51,15 +51,13 @@ export OPENCODE_CONFIG_CONTENT="$(cat <<EOF
   "model": "ubuntu-local/$model:latest",
   "small_model": "ubuntu-local/local-fast:latest",
   "enabled_providers": ["ubuntu-local"],
-  "plugins": [
+  "plugin": [
     "opencode-mem",
     "@nick-vi/opencode-type-inject@latest",
-    "@kitlangton/opencode-session-recap",
-    "@kitlangton/opencode-pr-tracker",
     "@mohak34/opencode-notifier@latest",
-    {
-      "package": "@prevalentware/opencode-goal-plugin",
-      "options": {
+    [
+      "@prevalentware/opencode-goal-plugin",
+      {
         "auto_continue": true,
         "defer_while_tasks_active": true,
         "max_auto_turns": 8,
@@ -73,7 +71,7 @@ export OPENCODE_CONFIG_CONTENT="$(cat <<EOF
         "restricted_agents": ["plan"],
         "allow_goal_execution_from_plan": false
       }
-    },
+    ],
     "@tarquinen/opencode-dcp@latest"
   ],
   "autoupdate": false,
