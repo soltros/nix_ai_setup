@@ -7,16 +7,16 @@ case "${1:---help}" in
     NIXAI — local AI command reference
     
     MODELS
-    Alias                          Source                    Context   Tools  Role
-    local-coder:latest             qwen3.5:9b                262144    yes    Default focused coding/tool model (~6.6 GB)
-    local-fast:latest              qwen3.5:4b                262144    yes    Faster fallback/small-task model
-    local-deepseek-coder:latest    deepseek-coder-v2:16b     163840    no     Coding/chat-only MoE model (~8.9 GB)
-    local-qwen-coder:latest        qwen2.5-coder:14b         32768     yes    Dedicated coding/refactor model (~9.0 GB)
-    local-starcoder:latest         starcoder2:instruct       16384     no     Coding/chat-only instruct model (~9.1 GB)
-    local-granite-code:latest      granite-code:8b           131072    no     Lightweight coding/chat-only model (~4.6 GB)
-    local-gemma4-e2b:latest        gemma4:e2b                131072    yes    Compact Gemma 4 (~7.2 GB)
-    local-gemma4-e4b:latest        gemma4:e4b                131072    yes    Mid-size Gemma 4 (~9.6 GB)
-    local-gemma4-12b:latest        gemma4:12b                262144    yes    Gemma 4 12B (~7.6 GB)
+    Alias                          Source                    Native   Runtime  Tools  Role
+    local-coder:latest             qwen3.5:9b                262144   65536    yes    Default focused coding/tool model (~6.6 GB)
+    local-fast:latest              qwen3.5:4b                262144   65536    yes    Faster fallback/small-task model
+    local-deepseek-coder:latest    deepseek-coder-v2:16b     163840   65536    no     Coding/chat-only MoE model (~8.9 GB)
+    local-qwen-coder:latest        qwen2.5-coder:14b         32768    32768    yes    OpenCode/direct coding model; below Hermes 64K minimum (~9.0 GB)
+    local-starcoder:latest         starcoder2:instruct       16384    16384    no     Coding/chat-only instruct model (~9.1 GB)
+    local-granite-code:latest      granite-code:8b           131072   65536    no     Lightweight coding/chat-only model (~4.6 GB)
+    local-gemma4-e2b:latest        gemma4:e2b                131072   65536    yes    Compact Gemma 4 (~7.2 GB)
+    local-gemma4-e4b:latest        gemma4:e4b                131072   65536    yes    Mid-size Gemma 4 (~9.6 GB)
+    local-gemma4-12b:latest        gemma4:12b                262144   65536    yes    Default Hermes persona model (~7.6 GB)
     
     MODEL PARAMETERS
     num_predict              4096
@@ -89,31 +89,43 @@ case "${1:---help}" in
       starcoder-chat
       granite-chat
     
+    HERMES RUNTIME
+    Ollama runtime context     65536 tokens for every Hermes-capable model
+    Hermes context_length      65536 tokens
+    Hermes ollama_num_ctx      65536 tokens
+    Minimum required by Hermes 64000 tokens
+    32K Qwen2.5-Coder          OpenCode/direct only; not exposed through Hermes
+
     HERMES — DURANDAL
+    durandal                   Gemma 4 12B (default)
+    durandal-fast              Qwen3.5 4B
+    durandal-gemma4-e2b        Gemma 4 E2B
+    durandal-gemma4-e4b        Gemma 4 E4B
+    durandal-gemma4-12b        Gemma 4 12B
+
+    Backward-compatible aliases:
     hermes-coder               Qwen3.5 9B
     hermes-fast                Qwen3.5 4B
-    hermes-qwen-coder          Qwen2.5-Coder 14B
     hermes-gemma4-e2b          Gemma 4 E2B
     hermes-gemma4-e4b          Gemma 4 E4B
     hermes-gemma4-12b          Gemma 4 12B
     
     HERMES — 343 GUILTY SPARK
-    spark                      Qwen3.5 9B
+    spark                      Gemma 4 12B (default)
     spark-fast                 Qwen3.5 4B
-    spark-qwen-coder           Qwen2.5-Coder 14B
     spark-gemma4-e2b           Gemma 4 E2B
     spark-gemma4-e4b           Gemma 4 E4B
     spark-gemma4-12b           Gemma 4 12B
     
     HERMES — RASPUTIN
-    rasputin                   Qwen3.5 9B
+    rasputin                   Gemma 4 12B (default)
     rasputin-fast              Qwen3.5 4B
-    rasputin-qwen-coder        Qwen2.5-Coder 14B
     rasputin-gemma4-e2b        Gemma 4 E2B
     rasputin-gemma4-e4b        Gemma 4 E4B
     rasputin-gemma4-12b        Gemma 4 12B
     
     DIRECT CHAT / COMPLETION ONLY
+    qwen-coder-chat            Qwen2.5-Coder 14B (32K native; below Hermes 64K minimum)
     deepseek-chat              DeepSeek Coder V2 16B
     starcoder-chat             StarCoder2 Instruct
     granite-chat               Granite Code 8B
@@ -129,6 +141,8 @@ case "${1:---help}" in
     ollama-get-gemma4-e4b
     ollama-get-gemma4-12b
     ollama-get-models           Install all configured models sequentially
+    ollama-sync-contexts        Retune installed aliases to current runtime contexts
+    ollama-sync-model-contexts  Alias for ollama-sync-contexts
     ollama list                 Show installed Ollama models
     ollama ps                   Show loaded model and GPU residency
     
