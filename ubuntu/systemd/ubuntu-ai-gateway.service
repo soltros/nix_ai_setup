@@ -7,7 +7,7 @@ Requires=ollama.service
 Type=simple
 ExecStart=/usr/bin/python3 /opt/ubuntu-ai/gateway.py
 Environment=AI_BACKEND=http://127.0.0.1:11434
-Environment=AI_MAX_TOKENS=4096
+Environment=AI_MAX_TOKENS=16384
 Environment=AI_TIMEOUT=180
 Restart=on-failure
 RestartSec=2
