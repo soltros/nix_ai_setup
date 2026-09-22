@@ -10,6 +10,11 @@ shift $(( $# >= 1 ? 1 : 0 ))
 shift $(( $# >= 1 ? 1 : 0 ))
 
 model_exists "$model" || { echo "Unknown model alias: $model" >&2; exit 2; }
+[[ "$(model_field "$model" tools)" == "yes" ]] || {
+  echo "Model $model does not advertise native tool calling in Ollama and cannot be used as a Hermes agent model." >&2
+  echo "Use it directly with: ollama run $model:latest" >&2
+  exit 2
+}
 
 case "$persona" in
   durandal) skin="durandal-marathon" ;;
