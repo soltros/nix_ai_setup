@@ -51,7 +51,31 @@ export OPENCODE_CONFIG_CONTENT="$(cat <<EOF
   "model": "ubuntu-local/$model:latest",
   "small_model": "ubuntu-local/local-fast:latest",
   "enabled_providers": ["ubuntu-local"],
-  "plugins": ["opencode-mem"],
+  "plugins": [
+    "opencode-mem",
+    "@nick-vi/opencode-type-inject@latest",
+    "@kitlangton/opencode-session-recap",
+    "@kitlangton/opencode-pr-tracker",
+    "@mohak34/opencode-notifier@latest",
+    {
+      "package": "@prevalentware/opencode-goal-plugin",
+      "options": {
+        "auto_continue": true,
+        "defer_while_tasks_active": true,
+        "max_auto_turns": 8,
+        "min_continue_interval_seconds": 3,
+        "max_turn_time": 180,
+        "max_task_block_seconds": 600,
+        "max_prompt_failures": 2,
+        "max_goal_duration_seconds": 900,
+        "no_progress_token_threshold": 50,
+        "max_no_progress_turns": 2,
+        "restricted_agents": ["plan"],
+        "allow_goal_execution_from_plan": false
+      }
+    },
+    "@tarquinen/opencode-dcp@latest"
+  ],
   "autoupdate": false,
   "share": "disabled",
   "provider": {
