@@ -44,6 +44,12 @@ let
       localName = lib.removeSuffix ":latest" (lib.removePrefix "nix-local/" model);
     in
     modelContexts.${localName};
+  hermesContextForModel = model:
+    let
+      native = contextForModel model;
+    in
+    if native >= 65536 then 65536 else native;
+
   modelfile =
     name: source:
     pkgs.writeText "${name}.Modelfile" ''
@@ -66,7 +72,8 @@ let
         default = model;
         base_url = "${endpoint}/v1";
         api_key = "ollama";
-        context_length = contextForModel model;
+        context_length = hermesContextForModel model;
+        ollama_num_ctx = hermesContextForModel model;
       };
       agent = {
         max_turns = 12;
@@ -335,7 +342,7 @@ Alias                          Source                    Context   Tools  Role
 local-coder:latest             qwen3.5:9b                262144    yes    Default focused coding/tool model (~6.6 GB)
 local-fast:latest              qwen3.5:4b                262144    yes    Faster fallback/small-task model
 local-deepseek-coder:latest    deepseek-coder-v2:16b     163840    no     Coding/chat-only MoE model (~8.9 GB)
-local-qwen-coder:latest        qwen2.5-coder:14b         32768     yes    Dedicated coding/refactor model (~9.0 GB)
+local-qwen-coder:latest        qwen2.5-coder:14b         32768     yes    OpenCode/direct coding model; below Hermes 64K minimum (~9.0 GB)
 local-starcoder:latest         starcoder2:instruct       16384     no     Coding/chat-only instruct model (~9.1 GB)
 local-granite-code:latest      granite-code:8b           131072    no     Lightweight coding/chat-only model (~4.6 GB)
 local-gemma4-e2b:latest        gemma4:e2b                131072    yes    Compact Gemma 4 (~7.2 GB)
@@ -413,10 +420,16 @@ DeepSeek Coder V2, StarCoder2, and Granite Code remain available through:
   starcoder-chat
   granite-chat
 
+HERMES RUNTIME
+Ollama runtime context     65536 tokens for every Hermes-capable model
+Hermes context_length      65536 tokens
+Hermes ollama_num_ctx      65536 tokens, sent on every local request
+Minimum required by Hermes 64000 tokens
+32K Qwen2.5-Coder          OpenCode/direct only; not exposed through Hermes
+
 HERMES — DURANDAL
 hermes-coder               Qwen3.5 9B
 hermes-fast                Qwen3.5 4B
-hermes-qwen-coder          Qwen2.5-Coder 14B
 hermes-gemma4-e2b          Gemma 4 E2B
 hermes-gemma4-e4b          Gemma 4 E4B
 hermes-gemma4-12b          Gemma 4 12B
@@ -424,7 +437,6 @@ hermes-gemma4-12b          Gemma 4 12B
 HERMES — 343 GUILTY SPARK
 spark                      Qwen3.5 9B
 spark-fast                 Qwen3.5 4B
-spark-qwen-coder           Qwen2.5-Coder 14B
 spark-gemma4-e2b           Gemma 4 E2B
 spark-gemma4-e4b           Gemma 4 E4B
 spark-gemma4-12b           Gemma 4 12B
@@ -432,12 +444,12 @@ spark-gemma4-12b           Gemma 4 12B
 HERMES — RASPUTIN
 rasputin                   Qwen3.5 9B
 rasputin-fast              Qwen3.5 4B
-rasputin-qwen-coder        Qwen2.5-Coder 14B
 rasputin-gemma4-e2b        Gemma 4 E2B
 rasputin-gemma4-e4b        Gemma 4 E4B
 rasputin-gemma4-12b        Gemma 4 12B
 
 DIRECT CHAT / COMPLETION ONLY
+qwen-coder-chat            Qwen2.5-Coder 14B (32K native; below Hermes 64K minimum)
 deepseek-chat              DeepSeek Coder V2 16B
 starcoder-chat             StarCoder2 Instruct
 granite-chat               Granite Code 8B
@@ -529,21 +541,18 @@ in
       hermesSetup
       hermesLocal
       (hermesDurandal "hermes-local-fast" "local-fast:latest")
-      (hermesDurandal "hermes-local-qwen-coder" "local-qwen-coder:latest")
       (hermesDurandal "hermes-local-gemma4-e2b" "local-gemma4-e2b:latest")
       (hermesDurandal "hermes-local-gemma4-e4b" "local-gemma4-e4b:latest")
       (hermesDurandal "hermes-local-gemma4-12b" "local-gemma4-12b:latest")
 
       (hermesSpark "hermes-guilty-spark" "local-coder:latest")
       (hermesSpark "hermes-guilty-spark-fast" "local-fast:latest")
-      (hermesSpark "hermes-guilty-spark-qwen-coder" "local-qwen-coder:latest")
       (hermesSpark "hermes-guilty-spark-gemma4-e2b" "local-gemma4-e2b:latest")
       (hermesSpark "hermes-guilty-spark-gemma4-e4b" "local-gemma4-e4b:latest")
       (hermesSpark "hermes-guilty-spark-gemma4-12b" "local-gemma4-12b:latest")
 
       (hermesRasputin "hermes-rasputin" "local-coder:latest")
       (hermesRasputin "hermes-rasputin-fast" "local-fast:latest")
-      (hermesRasputin "hermes-rasputin-qwen-coder" "local-qwen-coder:latest")
       (hermesRasputin "hermes-rasputin-gemma4-e2b" "local-gemma4-e2b:latest")
       (hermesRasputin "hermes-rasputin-gemma4-e4b" "local-gemma4-e4b:latest")
       (hermesRasputin "hermes-rasputin-gemma4-12b" "local-gemma4-12b:latest")
@@ -560,21 +569,18 @@ in
       hermes-setup-personas = "hermes-setup";
       hermes-coder = "hermes-local";
       hermes-fast = "hermes-local-fast";
-      hermes-qwen-coder = "hermes-local-qwen-coder";
       hermes-gemma4-e2b = "hermes-local-gemma4-e2b";
       hermes-gemma4-e4b = "hermes-local-gemma4-e4b";
       hermes-gemma4-12b = "hermes-local-gemma4-12b";
 
       spark = "hermes-guilty-spark";
       spark-fast = "hermes-guilty-spark-fast";
-      spark-qwen-coder = "hermes-guilty-spark-qwen-coder";
       spark-gemma4-e2b = "hermes-guilty-spark-gemma4-e2b";
       spark-gemma4-e4b = "hermes-guilty-spark-gemma4-e4b";
       spark-gemma4-12b = "hermes-guilty-spark-gemma4-12b";
 
       rasputin = "hermes-rasputin";
       rasputin-fast = "hermes-rasputin-fast";
-      rasputin-qwen-coder = "hermes-rasputin-qwen-coder";
       rasputin-gemma4-e2b = "hermes-rasputin-gemma4-e2b";
       rasputin-gemma4-e4b = "hermes-rasputin-gemma4-e4b";
       rasputin-gemma4-12b = "hermes-rasputin-gemma4-12b";
@@ -582,6 +588,7 @@ in
       # These models are useful for direct coding/chat, but Ollama does not
       # advertise native tool calling for them, so they are intentionally not
       # exposed through Hermes or OpenCode agent launchers.
+      qwen-coder-chat = "ollama run local-qwen-coder:latest";
       deepseek-chat = "ollama run local-deepseek-coder:latest";
       starcoder-chat = "ollama run local-starcoder:latest";
       granite-chat = "ollama run local-granite-code:latest";
