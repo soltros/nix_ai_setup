@@ -20,7 +20,6 @@ install_one() {
   source="$(model_field "$alias" source)"
   context="$(model_field "$alias" context)"
   tmp="$(mktemp)"
-  trap 'rm -f "$tmp"' RETURN
   cat >"$tmp" <<EOF
 FROM $source
 PARAMETER num_ctx $context
@@ -35,6 +34,7 @@ EOF
   ollama pull "$source"
   echo "Creating tuned alias $alias:latest with native context $context..."
   ollama create "$alias" -f "$tmp"
+  rm -f "$tmp"
 }
 
 case "${1:-}" in
