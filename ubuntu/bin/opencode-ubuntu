@@ -12,7 +12,7 @@ model_exists "$model" || { echo "Unknown model alias: $model" >&2; exit 2; }
   echo "Use it directly with: ollama run $model:latest" >&2
   exit 2
 }
-context="$(model_field "$model" context)"
+context="$(model_field "$model" runtime_context)"
 
 tui_config="${XDG_CONFIG_HOME:-$HOME/.config}/opencode/tui.json"
 if [[ ! -e "$tui_config" ]]; then
@@ -103,7 +103,7 @@ export OPENCODE_CONFIG_CONTENT="$(cat <<EOF
       "models": {
         "local-coder:latest": {
           "name": "local-coder:latest",
-          "limit": {"context": 262144, "output": 4096}
+          "limit": {"context": 65536, "output": 4096}
         },
         "local-fast:latest": {
           "name": "local-fast:latest",
@@ -115,7 +115,7 @@ export OPENCODE_CONFIG_CONTENT="$(cat <<EOF
         },
         "local-gemma4-e2b:latest": {
           "name": "local-gemma4-e2b:latest",
-          "limit": {"context": 131072, "output": 4096}
+          "limit": {"context": 65536, "output": 4096}
         },
         "local-gemma4-e4b:latest": {
           "name": "local-gemma4-e4b:latest",
