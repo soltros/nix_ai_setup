@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="${UBUNTU_AI_ROOT:-/opt/ubuntu-ai}"
+# shellcheck source=/dev/null
+source "$ROOT/lib/models.sh"
+
+persona="${1:-durandal}"
+model="${2:-local-coder}"
+shift $(( $# >= 1 ? 1 : 0 ))
+shift $(( $# >= 1 ? 1 : 0 ))
+
+model_exists "$model" || { echo "Unknown model alias: $model" >&2; exit 2; }
+
+case "$persona" in
+  durandal) skin="durandal-marathon" ;;
+  guilty-spark) skin="guilty-spark-forerunner" ;;
+  rasputin) skin="rasputin-ikelos" ;;
+  *) echo "Unknown persona: $persona" >&2; exit 2 ;;
+esac
+
+context="$(model_field "$model" context)"
+soul="$ROOT/personas/$persona/SOUL.md"
+skin_file="$ROOT/skins/$skin.yaml"
+[[ -r "$soul" && -r "$skin_file" ]] || {
+  echo "Ubuntu AI persona assets missing for $persona." >&2
+  exit 1
+}
+
+export HERMES_HOME="${XDG_STATE_HOME:-$HOME/.local/state}/ubuntu-ai/hermes"
+mkdir -p "$HERMES_HOME/skins"
+ln -sfn "$soul" "$HERMES_HOME/SOUL.md"
+ln -sfn "$skin_file" "$HERMES_HOME/skins/$skin.yaml"
+
+cat >"$HERMES_HOME/config.yaml" <<EOF
+model:
+  provider: custom
+  default: $model:latest
+  base_url: http://127.0.0.1:11435/v1
+  api_key: ollama
+  context_length: $context
+agent:
+  max_turns: 12
+  api_max_retries: 1
+  reasoning_effort: none
+platform_toolsets:
+  cli:
+    - terminal
+    - file
+terminal:
+  backend: local
+  timeout: 60
+compression:
+  enabled: true
+  threshold: 0.65
+auxiliary:
+  compression:
+    provider: main
+  title_generation:
+    provider: main
+  tool_selection:
+    provider: main
+fallback_providers: []
+display:
+  skin: $skin
+EOF
+chmod 600 "$HERMES_HOME/config.yaml"
+
+export OPENAI_API_KEY=ollama
+export OPENAI_BASE_URL=http://127.0.0.1:11435/v1
+export HERMES_API_TIMEOUT=180
+export HERMES_STREAM_READ_TIMEOUT=180
+
+exec hermes "$@"
