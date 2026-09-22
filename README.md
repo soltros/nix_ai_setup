@@ -67,7 +67,21 @@ The aliases first pull the upstream model and then create the tuned local alias 
 
 **Alpaca:** open Preferences / connection settings, add an **external Ollama** connection to `http://127.0.0.1:11435`, then select `local-coder:latest`. Use this shared connection rather than starting Alpaca's own managed Ollama. Model management is done with the `ollama` command, since the bounded endpoint intentionally exposes only generation and read-only discovery.
 
-**Hermes CLI:** run `hermes-local`. Hermes must already be installed (it is on the inspected system). This starts a separate local configuration under `${XDG_STATE_HOME:-$HOME/.local/state}/nix-ai-setup/hermes`, with file and terminal tools, 12 model iterations, one API retry, no cloud fallback, and thinking disabled. Existing Hermes profiles and credentials are not copied or changed. The generated local config is refreshed each launch; persist custom settings in this module instead.
+**Hermes CLI:** run `hermes-local` for Qwen3.5 9B, or use one of the model-specific launchers below. Hermes must already be installed (it is on the inspected system). Each launcher writes a temporary local configuration under `${XDG_STATE_HOME:-$HOME/.local/state}/nix-ai-setup/hermes`, with file and terminal tools, 12 model iterations, one API retry, no cloud fallback, and thinking disabled. Existing Hermes profiles and credentials are not copied or changed. The generated local config is refreshed each launch; persist custom settings in this module instead.
+
+```sh
+hermes-coder
+hermes-fast
+hermes-deepseek
+hermes-qwen-coder
+hermes-starcoder
+hermes-granite
+hermes-gemma4-e2b
+hermes-gemma4-e4b
+hermes-gemma4-12b
+```
+
+These aliases map to the corresponding `hermes-local-*` launchers, so you can still invoke the full command names directly if desired.
 
 **Hermes Desktop / another Hermes profile:** select a custom OpenAI-compatible provider with the settings below. `/etc/nix-ai-setup/hermes.yaml` contains the complete example, including `agent.max_turns = 12`. Selecting just the endpoint does not apply the profile's step limit.
 
