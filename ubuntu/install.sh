@@ -115,7 +115,7 @@ echo "== Gateway unit tests =="
   python3 -m unittest -v test_gateway.py
 )
 
-for cmd in ubuntu-ai-model ubuntu-ai-help ubuntu-ai-diagnose hermes-ubuntu opencode-ubuntu; do
+for cmd in nixai ubuntu-ai-model ubuntu-ai-help ubuntu-ai-diagnose hermes-ubuntu opencode-ubuntu; do
   sudo ln -sfn "$INSTALL_ROOT/bin/$cmd" "/usr/local/bin/$cmd"
 done
 
@@ -169,5 +169,5 @@ esac
 echo
 echo "Installation complete."
 echo "Run: source ~/.bashrc"
-echo "Then: hermes-help"
+echo "Then: nixai --help"
 echo "Diagnostics: ubuntu-ai-diagnose"
