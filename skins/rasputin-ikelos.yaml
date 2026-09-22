@@ -1,0 +1,74 @@
+name: rasputin-ikelos
+description: IKELOS Warmind terminal skin for the Rasputin Hermes persona
+
+colors:
+  background: "#121214"
+  banner_border: "#2E3033"
+  banner_title: "#FF5500"
+  banner_accent: "#FF8800"
+  banner_dim: "#C41E3A"
+  banner_text: "#EAEAEA"
+  ui_accent: "#FF5500"
+  ui_label: "#EAEAEA"
+  ui_ok: "#FF8800"
+  ui_error: "#C41E3A"
+  ui_warn: "#FF8800"
+  ui_tool: "#FF5500"
+  ui_thinking: "#2E3033"
+  diff_added: "#3a2208"
+  diff_removed: "#390c12"
+  diff_added_word: "#FF8800"
+  diff_removed_word: "#C41E3A"
+  syntax_string: "#FF8800"
+  syntax_number: "#EAEAEA"
+  syntax_keyword: "#FF5500"
+  syntax_comment: "#6d7075"
+  prompt: "#FF5500"
+  input_rule: "#2E3033"
+  response_border: "#FF5500"
+  status_bar_bg: "#1E1E22"
+  status_bar_text: "#EAEAEA"
+  status_bar_strong: "#FF8800"
+  status_bar_dim: "#6d7075"
+  status_bar_good: "#FF8800"
+  status_bar_warn: "#FF5500"
+  status_bar_bad: "#C41E3A"
+  status_bar_critical: "#C41E3A"
+  session_label: "#EAEAEA"
+  session_border: "#FF5500"
+  completion_menu_bg: "#171719"
+  completion_menu_current_bg: "#3a2208"
+  completion_menu_meta_bg: "#2E3033"
+  completion_menu_meta_current_bg: "#51300c"
+  voice_status_bg: "#1E1E22"
+  selection_bg: "#3a2208"
+
+branding:
+  agent_name: "RASPUTIN"
+  welcome: "WARMIND NODE ACTIVE // OPERATOR AUTHORIZED // TELEMETRY ONLINE"
+  goodbye: "OBJECTIVE COMPLETE // NODE REMAINS ACTIVE"
+  response_label: " RASPUTIN "
+  prompt_symbol: "◆"
+  help_header: "WARMIND tactical command index"
+
+spinner:
+  waiting_faces: [ "◆", "◇", "◈" ]
+  thinking_faces: [ "◈", "◆", "◇" ]
+  thinking_verbs:
+    - "calculating vector"
+    - "integrating telemetry"
+    - "designating target"
+    - "locking solution"
+  wings:
+    - ["<", ">"]
+    - ["//", "//"]
+
+tool_prefix: "┃"
+
+banner_logo: |-
+  [#EAEAEA]WARMIND // IKELOS STRATEGIC NODE // СЕРП-9 // В-04[/]
+  [#2E3033]────────────────────────────────────────────────────────────────────────────────[/]
+
+banner_hero: |
+  [bold #FF5500]                         R A S P U T I N                         [/]
+  [#FF8800]                 WARMIND PROTOCOL // TELEMETRY ACTIVE[/]
