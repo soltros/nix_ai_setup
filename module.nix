@@ -30,6 +30,14 @@ let
     local-gemma4-e4b = 131072;
     local-gemma4-12b = 262144;
   };
+  toolCapableModels = [
+    "local-coder:latest"
+    "local-fast:latest"
+    "local-qwen-coder:latest"
+    "local-gemma4-e2b:latest"
+    "local-gemma4-e4b:latest"
+    "local-gemma4-12b:latest"
+  ];
   contextForModel =
     model:
     let
@@ -101,17 +109,7 @@ let
         headerTimeout = (cfg.requestTimeout + 10) * 1000;
         chunkTimeout = (cfg.requestTimeout + 10) * 1000;
       };
-      models = lib.genAttrs [
-        "local-coder:latest"
-        "local-fast:latest"
-        "local-deepseek-coder:latest"
-        "local-qwen-coder:latest"
-        "local-starcoder:latest"
-        "local-granite-code:latest"
-        "local-gemma4-e2b:latest"
-        "local-gemma4-e4b:latest"
-        "local-gemma4-12b:latest"
-      ] (name: {
+      models = lib.genAttrs toolCapableModels (name: {
         inherit name;
         limit = {
           context = contextForModel name;
@@ -232,39 +230,27 @@ in
       pkgs.opencode
       hermesLocal
       (hermesDurandal "hermes-local-fast" "local-fast:latest")
-      (hermesDurandal "hermes-local-deepseek" "local-deepseek-coder:latest")
       (hermesDurandal "hermes-local-qwen-coder" "local-qwen-coder:latest")
-      (hermesDurandal "hermes-local-starcoder" "local-starcoder:latest")
-      (hermesDurandal "hermes-local-granite" "local-granite-code:latest")
       (hermesDurandal "hermes-local-gemma4-e2b" "local-gemma4-e2b:latest")
       (hermesDurandal "hermes-local-gemma4-e4b" "local-gemma4-e4b:latest")
       (hermesDurandal "hermes-local-gemma4-12b" "local-gemma4-12b:latest")
 
       (hermesSpark "hermes-guilty-spark" "local-coder:latest")
       (hermesSpark "hermes-guilty-spark-fast" "local-fast:latest")
-      (hermesSpark "hermes-guilty-spark-deepseek" "local-deepseek-coder:latest")
       (hermesSpark "hermes-guilty-spark-qwen-coder" "local-qwen-coder:latest")
-      (hermesSpark "hermes-guilty-spark-starcoder" "local-starcoder:latest")
-      (hermesSpark "hermes-guilty-spark-granite" "local-granite-code:latest")
       (hermesSpark "hermes-guilty-spark-gemma4-e2b" "local-gemma4-e2b:latest")
       (hermesSpark "hermes-guilty-spark-gemma4-e4b" "local-gemma4-e4b:latest")
       (hermesSpark "hermes-guilty-spark-gemma4-12b" "local-gemma4-12b:latest")
 
       (hermesRasputin "hermes-rasputin" "local-coder:latest")
       (hermesRasputin "hermes-rasputin-fast" "local-fast:latest")
-      (hermesRasputin "hermes-rasputin-deepseek" "local-deepseek-coder:latest")
       (hermesRasputin "hermes-rasputin-qwen-coder" "local-qwen-coder:latest")
-      (hermesRasputin "hermes-rasputin-starcoder" "local-starcoder:latest")
-      (hermesRasputin "hermes-rasputin-granite" "local-granite-code:latest")
       (hermesRasputin "hermes-rasputin-gemma4-e2b" "local-gemma4-e2b:latest")
       (hermesRasputin "hermes-rasputin-gemma4-e4b" "local-gemma4-e4b:latest")
       (hermesRasputin "hermes-rasputin-gemma4-12b" "local-gemma4-12b:latest")
       (openCodeLauncher "opencode-local" "nix-local/local-coder:latest")
       (openCodeLauncher "opencode-local-fast" "nix-local/local-fast:latest")
-      (openCodeLauncher "opencode-local-deepseek" "nix-local/local-deepseek-coder:latest")
       (openCodeLauncher "opencode-local-qwen-coder" "nix-local/local-qwen-coder:latest")
-      (openCodeLauncher "opencode-local-starcoder" "nix-local/local-starcoder:latest")
-      (openCodeLauncher "opencode-local-granite" "nix-local/local-granite-code:latest")
       (openCodeLauncher "opencode-local-gemma4-e2b" "nix-local/local-gemma4-e2b:latest")
       (openCodeLauncher "opencode-local-gemma4-e4b" "nix-local/local-gemma4-e4b:latest")
       (openCodeLauncher "opencode-local-gemma4-12b" "nix-local/local-gemma4-12b:latest")
@@ -274,45 +260,43 @@ in
     programs.zsh.shellAliases = {
       hermes-coder = "hermes-local";
       hermes-fast = "hermes-local-fast";
-      hermes-deepseek = "hermes-local-deepseek";
       hermes-qwen-coder = "hermes-local-qwen-coder";
-      hermes-starcoder = "hermes-local-starcoder";
-      hermes-granite = "hermes-local-granite";
       hermes-gemma4-e2b = "hermes-local-gemma4-e2b";
       hermes-gemma4-e4b = "hermes-local-gemma4-e4b";
       hermes-gemma4-12b = "hermes-local-gemma4-12b";
 
       spark = "hermes-guilty-spark";
       spark-fast = "hermes-guilty-spark-fast";
-      spark-deepseek = "hermes-guilty-spark-deepseek";
       spark-qwen-coder = "hermes-guilty-spark-qwen-coder";
-      spark-starcoder = "hermes-guilty-spark-starcoder";
-      spark-granite = "hermes-guilty-spark-granite";
       spark-gemma4-e2b = "hermes-guilty-spark-gemma4-e2b";
       spark-gemma4-e4b = "hermes-guilty-spark-gemma4-e4b";
       spark-gemma4-12b = "hermes-guilty-spark-gemma4-12b";
 
       rasputin = "hermes-rasputin";
       rasputin-fast = "hermes-rasputin-fast";
-      rasputin-deepseek = "hermes-rasputin-deepseek";
       rasputin-qwen-coder = "hermes-rasputin-qwen-coder";
-      rasputin-starcoder = "hermes-rasputin-starcoder";
-      rasputin-granite = "hermes-rasputin-granite";
       rasputin-gemma4-e2b = "hermes-rasputin-gemma4-e2b";
       rasputin-gemma4-e4b = "hermes-rasputin-gemma4-e4b";
       rasputin-gemma4-12b = "hermes-rasputin-gemma4-12b";
+
+      # These models are useful for direct coding/chat, but Ollama does not
+      # advertise native tool calling for them, so they are intentionally not
+      # exposed through Hermes or OpenCode agent launchers.
+      deepseek-chat = "ollama run local-deepseek-coder:latest";
+      starcoder-chat = "ollama run local-starcoder:latest";
+      granite-chat = "ollama run local-granite-code:latest";
       ollama-models = ''printf '%s\n' \
         "MODEL ALIASES" \
-        "Model alias                     Source                    Context   Role" \
-        "local-coder:latest              qwen3.5:9b                262144    Default for focused coding and tool use; approximately 6.6 GB weights" \
-        "local-fast:latest               qwen3.5:4b                262144    Faster small tasks and a fallback if 9B is too slow" \
-        "local-deepseek-coder:latest     deepseek-coder-v2:16b     163840    Larger coding-focused MoE model; about 8.9 GB" \
-        "local-qwen-coder:latest         qwen2.5-coder:14b         32768     Dedicated code model for refactoring, explanation, and generation; about 9.0 GB" \
-        "local-starcoder:latest          starcoder2:instruct       16384     Instruct-tuned StarCoder2 for interactive programming; about 9.1 GB" \
-        "local-granite-code:latest       granite-code:8b           131072    Lightweight IBM code model; about 4.6 GB" \
-        "local-gemma4-e2b:latest         gemma4:e2b                131072    Compact Gemma 4 variant; about 7.2 GB" \
-        "local-gemma4-e4b:latest         gemma4:e4b                131072    Mid-size Gemma 4 variant; about 9.6 GB" \
-        "local-gemma4-12b:latest         gemma4:12b                262144    Dense Gemma 4 12B model; about 7.6 GB" \
+        "Model alias                     Source                    Context   Tools  Role" \
+        "local-coder:latest              qwen3.5:9b                262144    yes    Default for focused coding and tool use; approximately 6.6 GB weights" \
+        "local-fast:latest               qwen3.5:4b                262144    yes    Faster small tasks and a fallback if 9B is too slow" \
+        "local-deepseek-coder:latest     deepseek-coder-v2:16b     163840    no     Larger coding-focused MoE model; about 8.9 GB" \
+        "local-qwen-coder:latest         qwen2.5-coder:14b         32768     yes    Dedicated code model for refactoring, explanation, and generation; about 9.0 GB" \
+        "local-starcoder:latest          starcoder2:instruct       16384     no     Instruct-tuned StarCoder2 for interactive programming; about 9.1 GB" \
+        "local-granite-code:latest       granite-code:8b           131072    no     Lightweight IBM code model; about 4.6 GB" \
+        "local-gemma4-e2b:latest         gemma4:e2b                131072    yes    Compact Gemma 4 variant; about 7.2 GB" \
+        "local-gemma4-e4b:latest         gemma4:e4b                131072    yes    Mid-size Gemma 4 variant; about 9.6 GB" \
+        "local-gemma4-12b:latest         gemma4:12b                262144    yes    Dense Gemma 4 12B model; about 7.6 GB" \
         "" \
         "HERMES PERSONAS" \
         "Persona            Default alias     Skin" \
@@ -321,16 +305,19 @@ in
         "Rasputin           rasputin          rasputin-ikelos" \
         "" \
         "DURANDAL MODEL ALIASES" \
-        "hermes-coder  hermes-fast  hermes-deepseek  hermes-qwen-coder  hermes-starcoder" \
-        "hermes-granite  hermes-gemma4-e2b  hermes-gemma4-e4b  hermes-gemma4-12b" \
+        "hermes-coder  hermes-fast  hermes-qwen-coder" \
+        "hermes-gemma4-e2b  hermes-gemma4-e4b  hermes-gemma4-12b" \
         "" \
         "GUILTY SPARK MODEL ALIASES" \
-        "spark  spark-fast  spark-deepseek  spark-qwen-coder  spark-starcoder" \
-        "spark-granite  spark-gemma4-e2b  spark-gemma4-e4b  spark-gemma4-12b" \
+        "spark  spark-fast  spark-qwen-coder" \
+        "spark-gemma4-e2b  spark-gemma4-e4b  spark-gemma4-12b" \
         "" \
         "RASPUTIN MODEL ALIASES" \
-        "rasputin  rasputin-fast  rasputin-deepseek  rasputin-qwen-coder  rasputin-starcoder" \
-        "rasputin-granite  rasputin-gemma4-e2b  rasputin-gemma4-e4b  rasputin-gemma4-12b"'';
+        "rasputin  rasputin-fast  rasputin-qwen-coder" \
+        "rasputin-gemma4-e2b  rasputin-gemma4-e4b  rasputin-gemma4-12b" \
+        "" \
+        "DIRECT CHAT / COMPLETION ONLY (NO NATIVE TOOL CALLING)" \
+        "deepseek-chat  starcoder-chat  granite-chat"'';
       hermes-help = "ollama-models";
       ollama-get-coder = installModel "local-coder" aliases.local-coder;
       ollama-get-fast = installModel "local-fast" aliases.local-fast;
