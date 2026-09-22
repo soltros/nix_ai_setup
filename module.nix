@@ -15,6 +15,9 @@ let
     local-qwen-coder = "qwen2.5-coder:14b";
     local-starcoder = "starcoder2:instruct";
     local-granite-code = "granite-code:8b";
+    local-gemma4-e2b = "gemma4:e2b";
+    local-gemma4-e4b = "gemma4:e4b";
+    local-gemma4-12b = "gemma4:12b";
   };
   modelfile =
     name: source:
@@ -84,6 +87,9 @@ let
         "local-qwen-coder:latest"
         "local-starcoder:latest"
         "local-granite-code:latest"
+        "local-gemma4-e2b:latest"
+        "local-gemma4-e4b:latest"
+        "local-gemma4-12b:latest"
       ] (name: {
         inherit name;
         limit = {
@@ -185,6 +191,9 @@ in
       (openCodeLauncher "opencode-local-qwen-coder" "nix-local/local-qwen-coder:latest")
       (openCodeLauncher "opencode-local-starcoder" "nix-local/local-starcoder:latest")
       (openCodeLauncher "opencode-local-granite" "nix-local/local-granite-code:latest")
+      (openCodeLauncher "opencode-local-gemma4-e2b" "nix-local/local-gemma4-e2b:latest")
+      (openCodeLauncher "opencode-local-gemma4-e4b" "nix-local/local-gemma4-e4b:latest")
+      (openCodeLauncher "opencode-local-gemma4-12b" "nix-local/local-gemma4-12b:latest")
     ];
     environment.etc."nix-ai-setup/hermes.yaml".source = hermesConfig;
     environment.etc."nix-ai-setup/opencode.json".source = openCodeConfig;
@@ -195,6 +204,9 @@ in
       ollama-get-qwen-coder = installModel "local-qwen-coder" aliases.local-qwen-coder;
       ollama-get-starcoder = installModel "local-starcoder" aliases.local-starcoder;
       ollama-get-granite-code = installModel "local-granite-code" aliases.local-granite-code;
+      ollama-get-gemma4-e2b = installModel "local-gemma4-e2b" aliases.local-gemma4-e2b;
+      ollama-get-gemma4-e4b = installModel "local-gemma4-e4b" aliases.local-gemma4-e4b;
+      ollama-get-gemma4-12b = installModel "local-gemma4-12b" aliases.local-gemma4-12b;
       ollama-get-models = lib.concatStringsSep " && " [
         (installModel "local-coder" aliases.local-coder)
         (installModel "local-fast" aliases.local-fast)
@@ -202,6 +214,9 @@ in
         (installModel "local-qwen-coder" aliases.local-qwen-coder)
         (installModel "local-starcoder" aliases.local-starcoder)
         (installModel "local-granite-code" aliases.local-granite-code)
+        (installModel "local-gemma4-e2b" aliases.local-gemma4-e2b)
+        (installModel "local-gemma4-e4b" aliases.local-gemma4-e4b)
+        (installModel "local-gemma4-12b" aliases.local-gemma4-12b)
       ];
     };
     systemd.services.nix-ai-gateway = {
