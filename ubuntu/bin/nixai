@@ -58,6 +58,7 @@ case "${1:---help}" in
     Goal max auto turns      8
     Goal max duration        900s
     DCP load order           last
+    TUI config seed          ~/.config/opencode/tui.json (only if absent)
     
     OPENCODE AGENT ALIASES
     opencode-local             Qwen3.5 9B
