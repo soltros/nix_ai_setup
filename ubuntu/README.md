@@ -7,7 +7,7 @@ This setup recreates the same local-AI workflow as the NixOS version without req
 - Ollama with NVIDIA/CUDA acceleration
 - one bounded localhost gateway on `127.0.0.1:11435`
 - the same tuned local model aliases
-- per-model native context windows for Hermes/OpenCode
+- per-model native capability plus explicit runtime context windows for Hermes/OpenCode
 - Hermes Agent launchers
 - OpenCode launchers
 - Durandal, 343 Guilty Spark, and Rasputin Hermes personas
@@ -51,7 +51,7 @@ Install the integration but do not download models yet:
 bash install.sh
 ```
 
-Install the integration plus the two default Qwen models:
+Install the integration plus the core local models, including the default Gemma 4 12B persona model:
 
 ```bash
 bash install.sh --models core
@@ -142,23 +142,23 @@ OLLAMA_KV_CACHE_TYPE=q8_0
 OLLAMA_NO_CLOUD=1
 ```
 
-The model aliases themselves define their correct native context windows.
+The model aliases define explicit runtime context windows. Hermes-capable models are tuned to 65,536 tokens on this 12 GB setup.
 
-This is important for Hermes: Hermes receives the same context length that the tuned Ollama alias uses.
+This is important for Hermes: `context_length` and `ollama_num_ctx` both match the tuned Ollama runtime context.
 
 ## Models
 
-| Model alias | Source | Native context | Tools | Role |
-| --- | --- | ---: | :---: | --- |
-| `local-coder:latest` | `qwen3.5:9b` | 262,144 | yes | Default focused coding/tool model; ~6.6 GB |
-| `local-fast:latest` | `qwen3.5:4b` | 262,144 | yes | Faster small-task model |
-| `local-deepseek-coder:latest` | `deepseek-coder-v2:16b` | 163,840 | no | Larger coding-focused MoE model; ~8.9 GB |
-| `local-qwen-coder:latest` | `qwen2.5-coder:14b` | 32,768 | yes | Dedicated code/refactor model; ~9.0 GB |
-| `local-starcoder:latest` | `starcoder2:instruct` | 16,384 | no | Interactive StarCoder2; ~9.1 GB |
-| `local-granite-code:latest` | `granite-code:8b` | 131,072 | no | Lightweight IBM code model; ~4.6 GB |
-| `local-gemma4-e2b:latest` | `gemma4:e2b` | 131,072 | yes | Compact Gemma 4; ~7.2 GB |
-| `local-gemma4-e4b:latest` | `gemma4:e4b` | 131,072 | yes | Mid-size Gemma 4; ~9.6 GB |
-| `local-gemma4-12b:latest` | `gemma4:12b` | 262,144 | yes | Gemma 4 12B; ~7.6 GB |
+| Model alias | Source | Native context | Runtime context | Tools | Role |
+| --- | --- | ---: | ---: | :---: | --- |
+| `local-coder:latest` | `qwen3.5:9b` | 262,144 | 65,536 | yes | Focused coding/tool model; ~6.6 GB |
+| `local-fast:latest` | `qwen3.5:4b` | 262,144 | 65,536 | yes | Faster small-task model |
+| `local-deepseek-coder:latest` | `deepseek-coder-v2:16b` | 163,840 | 65,536 | no | Larger coding-focused MoE model; ~8.9 GB |
+| `local-qwen-coder:latest` | `qwen2.5-coder:14b` | 32,768 | 32,768 | yes | OpenCode/direct coding model; below Hermes 64K minimum; ~9.0 GB |
+| `local-starcoder:latest` | `starcoder2:instruct` | 16,384 | 16,384 | no | Interactive StarCoder2; ~9.1 GB |
+| `local-granite-code:latest` | `granite-code:8b` | 131,072 | 65,536 | no | Lightweight IBM code model; ~4.6 GB |
+| `local-gemma4-e2b:latest` | `gemma4:e2b` | 131,072 | 65,536 | yes | Compact Gemma 4; ~7.2 GB |
+| `local-gemma4-e4b:latest` | `gemma4:e4b` | 131,072 | 65,536 | yes | Mid-size Gemma 4; ~9.6 GB |
+| `local-gemma4-12b:latest` | `gemma4:12b` | 262,144 | 65,536 | yes | Default Hermes persona model; ~7.6 GB |
 
 Only one model is configured to stay loaded at once.
 
@@ -220,7 +220,7 @@ Three personas are included.
 
 | Persona | Default Bash alias | Skin |
 | --- | --- | --- |
-| Durandal | `hermes-coder` | `durandal-marathon` |
+| Durandal | `durandal` | `durandal-marathon` |
 | 343 Guilty Spark | `spark` | `guilty-spark-forerunner` |
 | Rasputin | `rasputin` | `rasputin-ikelos` |
 
@@ -232,7 +232,7 @@ Runtime Hermes state lives under:
 ~/.local/state/ubuntu-ai/hermes
 ```
 
-The launcher regenerates `config.yaml` for every run, symlinks the selected SOUL and skin, and sets the correct native model context.
+The launcher regenerates `config.yaml` for every run, symlinks the selected SOUL and skin, and sets both `context_length` and `ollama_num_ctx` to the tuned runtime context.
 
 Hermes and OpenCode agent launchers are intentionally limited to models that advertise native tool calling in Ollama. DeepSeek Coder V2, StarCoder2, and Granite Code remain available for direct coding/chat through:
 
@@ -247,9 +247,15 @@ The generic `hermes-ubuntu` and `opencode-ubuntu` launchers reject those non-too
 ### Durandal aliases
 
 ```bash
+durandal
+durandal-fast
+durandal-gemma4-e2b
+durandal-gemma4-e4b
+durandal-gemma4-12b
+
+# Backward-compatible aliases
 hermes-coder
 hermes-fast
-hermes-qwen-coder
 hermes-gemma4-e2b
 hermes-gemma4-e4b
 hermes-gemma4-12b
@@ -260,7 +266,6 @@ hermes-gemma4-12b
 ```bash
 spark
 spark-fast
-spark-qwen-coder
 spark-gemma4-e2b
 spark-gemma4-e4b
 spark-gemma4-12b
@@ -271,7 +276,6 @@ spark-gemma4-12b
 ```bash
 rasputin
 rasputin-fast
-rasputin-qwen-coder
 rasputin-gemma4-e2b
 rasputin-gemma4-e4b
 rasputin-gemma4-12b
@@ -280,9 +284,9 @@ rasputin-gemma4-12b
 You can also bypass aliases:
 
 ```bash
-hermes-ubuntu durandal local-coder
+hermes-ubuntu durandal local-gemma4-12b
 hermes-ubuntu guilty-spark local-gemma4-12b
-hermes-ubuntu rasputin local-deepseek-coder
+hermes-ubuntu rasputin local-gemma4-12b
 ```
 
 Any extra arguments are passed to Hermes.
@@ -329,7 +333,7 @@ OpenCode is forced to the local `ubuntu-local` provider and the bounded localhos
 The launcher sets:
 
 - the selected model
-- its native context limit
+- its actual tuned runtime context limit
 - 4,096 maximum output tokens
 - the local-fast model for small-model work
 - 12 build/plan steps
