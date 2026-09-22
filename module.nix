@@ -98,12 +98,12 @@ let
       runtimeConfig = pkgs.writeText "${name}.json" (builtins.toJSON (openCodeConfigFor model));
     in
     pkgs.writeShellScriptBin name ''
-        # Inline config has higher precedence than project config, so a project
-        # cannot silently switch this launcher back to a cloud provider.
-        OPENCODE_CONFIG_CONTENT="$(< ${runtimeConfig})"
-        export OPENCODE_CONFIG_CONTENT
-        exec ${lib.getExe pkgs.opencode} "$@"
-      '';
+      # Inline config has higher precedence than project config, so a project
+      # cannot silently switch this launcher back to a cloud provider.
+      OPENCODE_CONFIG_CONTENT="$(< ${runtimeConfig})"
+      export OPENCODE_CONFIG_CONTENT
+      exec ${lib.getExe pkgs.opencode} "$@"
+    '';
   hermesLocal = pkgs.writeShellApplication {
     name = "hermes-local";
     runtimeInputs = [ pkgs.coreutils ];
