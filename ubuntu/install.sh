@@ -160,6 +160,7 @@ case "$MODELS" in
   core)
     ubuntu-ai-model install local-coder
     ubuntu-ai-model install local-fast
+    ubuntu-ai-model install local-gemma4-12b
     ;;
   all)
     ubuntu-ai-model install-all
