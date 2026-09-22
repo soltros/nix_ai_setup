@@ -97,15 +97,13 @@ let
     inherit model;
     small_model = "nix-local/local-fast:latest";
     enabled_providers = [ "nix-local" ];
-    plugins = [
+    plugin = [
       "opencode-mem"
       "@nick-vi/opencode-type-inject@latest"
-      "@kitlangton/opencode-session-recap"
-      "@kitlangton/opencode-pr-tracker"
       "@mohak34/opencode-notifier@latest"
-      {
-        package = "@prevalentware/opencode-goal-plugin";
-        options = {
+      [
+        "@prevalentware/opencode-goal-plugin"
+        {
           auto_continue = true;
           defer_while_tasks_active = true;
           max_auto_turns = 8;
@@ -118,9 +116,9 @@ let
           max_no_progress_turns = 2;
           restricted_agents = [ "plan" ];
           allow_goal_execution_from_plan = false;
-        };
-      }
-      # DCP goes last so its message transforms run after the other plugins.
+        }
+      ]
+      # DCP stays last so its context transforms run after the other plugins.
       "@tarquinen/opencode-dcp@latest"
     ];
     autoupdate = false;
@@ -280,11 +278,9 @@ Request timeout          ${toString cfg.requestTimeout}s
 OpenCode/Hermes max steps 12
 Thinking/reasoning       disabled by bounded gateway
 
-OPENCODE PLUGINS
+OPENCODE PLUGINS (OpenCode 1.x compatible)
 opencode-mem                         Persistent local vector memory + profile learning
 @nick-vi/opencode-type-inject       TypeScript/Svelte type context and diagnostics
-@kitlangton/opencode-session-recap  One-line session recap after inactivity
-@kitlangton/opencode-pr-tracker     PR + CI state in the TUI (requires gh auth login)
 @mohak34/opencode-notifier          Desktop/sound notifications
 @prevalentware/opencode-goal-plugin Persistent /goal workflow; bounded to 8 auto turns / 15 min
 @tarquinen/opencode-dcp             Dynamic context pruning; loaded last
@@ -299,7 +295,6 @@ Config                   ~/.config/opencode/opencode-mem.jsonc
 Note                     Seeded once; user edits are preserved.
 
 PLUGIN RUNTIME
-GitHub CLI               gh (authenticate once with: gh auth login)
 Desktop notifications    notify-send via libnotify
 Goal max auto turns      8
 Goal max duration        900s
@@ -420,7 +415,6 @@ in
     environment.systemPackages = [
       pkgs.alpaca
       pkgs.opencode
-      pkgs.gh
       pkgs.libnotify
       nixai
       hermesLocal
