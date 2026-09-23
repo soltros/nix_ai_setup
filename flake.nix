@@ -1,5 +1,5 @@
 {
-  description = "Alpaca and bounded Vulkan local AI for Hermes and coding agents";
+  description = "Low-memory Vulkan local AI for an 8 GiB Intel laptop";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   outputs =
     { self, nixpkgs }:
@@ -47,8 +47,8 @@
           builtins.unsafeDiscardStringContext testSystem.config.system.build.toplevel.drvPath
         );
         launchers =
-          assert builtins.length openCodeLaunchers == 6;
-          assert builtins.length hermesLaunchers == 18;
+          assert builtins.length openCodeLaunchers == 3;
+          assert builtins.length hermesLaunchers == 6;
           pkgs.symlinkJoin {
             name = "nix-ai-launchers-check";
             paths = openCodeLaunchers ++ hermesLaunchers;
