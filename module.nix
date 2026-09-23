@@ -9,48 +9,31 @@ let
   python = pkgs.python3.withPackages (p: [ p.aiohttp ]);
   endpoint = "http://127.0.0.1:11435";
   aliases = {
-    local-coder = "qwen3.5:9b";
-    local-fast = "qwen3.5:4b";
-    local-deepseek-coder = "deepseek-coder-v2:16b";
-    local-qwen-coder = "qwen2.5-coder:14b";
-    local-starcoder = "starcoder2:instruct";
-    local-granite-code = "granite-code:8b";
-    local-gemma4-e2b = "gemma4:e2b";
-    local-gemma4-e4b = "gemma4:e4b";
-    local-gemma4-12b = "gemma4:12b";
+    local-coder = "qwen3.5:2b";
+    local-fast = "qwen3.5:0.8b";
+    local-qwen-coder = "qwen2.5-coder:3b";
+    local-chat = "gemma3:1b";
   };
   modelContexts = {
     local-coder = 262144;
     local-fast = 262144;
-    local-deepseek-coder = 163840;
     local-qwen-coder = 32768;
-    local-starcoder = 16384;
-    local-granite-code = 131072;
-    local-gemma4-e2b = 131072;
-    local-gemma4-e4b = 131072;
-    local-gemma4-12b = 262144;
+    local-chat = 32768;
   };
   runtimeContexts = {
-    # Actual contexts used by the tuned Ollama aliases on a 12 GiB GPU.
-    # Hermes requires >= 64K for tool use, so Hermes-capable models use 65,536.
+    # Laptop profile: 8 GiB-class shared-memory system.
+    # Hermes requires >=64K, so only the small Qwen3.5 models are exposed there.
     local-coder = 65536;
     local-fast = 65536;
-    local-deepseek-coder = 65536;
     local-qwen-coder = 32768;
-    local-starcoder = 16384;
-    local-granite-code = 65536;
-    local-gemma4-e2b = 65536;
-    local-gemma4-e4b = 65536;
-    local-gemma4-12b = 65536;
+    local-chat = 32768;
   };
   toolCapableModels = [
     "local-coder:latest"
     "local-fast:latest"
     "local-qwen-coder:latest"
-    "local-gemma4-e2b:latest"
-    "local-gemma4-e4b:latest"
-    "local-gemma4-12b:latest"
   ];
+
   contextForModel =
     model:
     let
@@ -94,15 +77,10 @@ let
         fi
       }
 
-      sync_one local-coder qwen3.5:9b ${modelfile "local-coder" aliases.local-coder} 65536
-      sync_one local-fast qwen3.5:4b ${modelfile "local-fast" aliases.local-fast} 65536
-      sync_one local-deepseek-coder deepseek-coder-v2:16b ${modelfile "local-deepseek-coder" aliases.local-deepseek-coder} 65536
-      sync_one local-qwen-coder qwen2.5-coder:14b ${modelfile "local-qwen-coder" aliases.local-qwen-coder} 32768
-      sync_one local-starcoder starcoder2:instruct ${modelfile "local-starcoder" aliases.local-starcoder} 16384
-      sync_one local-granite-code granite-code:8b ${modelfile "local-granite-code" aliases.local-granite-code} 65536
-      sync_one local-gemma4-e2b gemma4:e2b ${modelfile "local-gemma4-e2b" aliases.local-gemma4-e2b} 65536
-      sync_one local-gemma4-e4b gemma4:e4b ${modelfile "local-gemma4-e4b" aliases.local-gemma4-e4b} 65536
-      sync_one local-gemma4-12b gemma4:12b ${modelfile "local-gemma4-12b" aliases.local-gemma4-12b} 65536
+      sync_one local-coder qwen3.5:2b ${modelfile "local-coder" aliases.local-coder} 65536
+      sync_one local-fast qwen3.5:0.8b ${modelfile "local-fast" aliases.local-fast} 65536
+      sync_one local-qwen-coder qwen2.5-coder:3b ${modelfile "local-qwen-coder" aliases.local-qwen-coder} 32768
+      sync_one local-chat gemma3:1b ${modelfile "local-chat" aliases.local-chat} 32768
 
       echo
       echo "Context synchronization complete."
@@ -141,18 +119,7 @@ let
       auxiliary = lib.genAttrs [ "compression" "title_generation" "tool_selection" ] (_: {
         provider = "main";
       });
-      fallback_providers =
-        if model == "local-coder:latest" then
-          [ ]
-        else
-          [
-            {
-              provider = "custom";
-              model = "local-coder:latest";
-              base_url = "${endpoint}/v1";
-              api_key = "ollama";
-            }
-          ];
+      fallback_providers = [ ];
       display.skin = skin;
     };
   hermesConfig = hermesConfigFor "hermes-local" "local-coder:latest" "durandal-marathon";
@@ -386,7 +353,7 @@ EOF
       echo
       echo "Hermes persona assets are ready."
       echo "Default persona: Durandal"
-      echo "Default persona model: Qwen3.5 9B"
+      echo "Default persona model: Qwen3.5 2B"
       echo "Try: spark"
       echo "Try: rasputin"
     '';
@@ -398,167 +365,76 @@ EOF
       case "''${1:---help}" in
         -h|--help|help)
           cat <<'EOF'
-NIXAI — local AI command reference
+NIXAI — laptop local AI command reference
+
+TARGET HARDWARE
+CPU                      Intel Core i3-1315U
+GPU                      Intel UHD integrated / shared memory
+System RAM               8 GiB class
+Profile                  low-memory, one model at a time
 
 MODELS
-Alias                          Source                    Native   Runtime  Tools  Role
-local-coder:latest             qwen3.5:9b                262144   65536    yes    Default focused coding/tool model (~6.6 GB)
-local-fast:latest              qwen3.5:4b                262144   65536    yes    Faster fallback/small-task model
-local-deepseek-coder:latest    deepseek-coder-v2:16b     163840   65536    no     Coding/chat-only MoE model (~8.9 GB)
-local-qwen-coder:latest        qwen2.5-coder:14b         32768    32768    yes    OpenCode/direct coding model; below Hermes 64K minimum (~9.0 GB)
-local-starcoder:latest         starcoder2:instruct       16384    16384    no     Coding/chat-only instruct model (~9.1 GB)
-local-granite-code:latest      granite-code:8b           131072   65536    no     Lightweight coding/chat-only model (~4.6 GB)
-local-gemma4-e2b:latest        gemma4:e2b                131072   65536    yes    Compact Gemma 4 (~7.2 GB)
-local-gemma4-e4b:latest        gemma4:e4b                131072   65536    yes    Mid-size Gemma 4 (~9.6 GB)
-local-gemma4-12b:latest        gemma4:12b                262144   65536    yes    Gemma 4 12B (~7.6 GB)
+Alias                     Source              Native   Runtime  Tools  Role
+local-coder:latest        qwen3.5:2b          262144   65536    yes    Default Hermes/OpenCode model (~2.7 GB)
+local-fast:latest         qwen3.5:0.8b        262144   65536    yes    Lightweight Hermes/OpenCode model (~1.0 GB)
+local-qwen-coder:latest   qwen2.5-coder:3b    32768    32768    yes    Dedicated OpenCode/direct coding model (~1.9 GB)
+local-chat:latest         gemma3:1b           32768    32768    no     Tiny direct-chat model (~815 MB)
 
 MODEL PARAMETERS
-num_predict              ${toString cfg.maxTokens}
-temperature              0.7
-top_p                    0.8
-top_k                    20
-presence_penalty         1.5
-repeat_penalty           1.0
+OpenCode output budget   ${toString cfg.maxTokens}
+Hermes output budget     ${toString cfg.hermesMaxTokens}
+Gateway output ceiling   ${toString (lib.max cfg.maxTokens cfg.hermesMaxTokens)}
 KV cache                 q8_0
 Flash attention          enabled
 Loaded models            1
 Parallel generations     1
-Queue limit              4
-Keep alive               5m
+Queue limit              2
+Keep alive               60s
 Gateway                  http://127.0.0.1:11435
 Raw Ollama               http://127.0.0.1:11434
 Request timeout          ${toString cfg.requestTimeout}s
-OpenCode/Hermes max steps 12
-OpenCode output budget   ${toString cfg.maxTokens}
-Hermes output budget     ${toString cfg.hermesMaxTokens}
-Gateway output ceiling   ${toString (lib.max cfg.maxTokens cfg.hermesMaxTokens)}
 Thinking/reasoning       disabled by bounded gateway
 
-OPENCODE PLUGINS (OpenCode 1.x compatible)
-opencode-mem                         Persistent local vector memory + profile learning
-@nick-vi/opencode-type-inject       TypeScript/Svelte type context and diagnostics
-@mohak34/opencode-notifier          Desktop/sound notifications
-@prevalentware/opencode-goal-plugin Persistent /goal workflow; bounded to 8 auto turns / 15 min
-@tarquinen/opencode-dcp             Dynamic context pruning; loaded last
+HERMES
+Hermes minimum context   64000
+Hermes runtime context   65536
+Default model            local-coder:latest / Qwen3.5 2B
 
-OPENCODE-MEM SETTINGS
-Storage                  ~/.opencode-mem/data
-Web UI                   http://127.0.0.1:4747
-Auto-capture             enabled
-Capture provider         nix-local
-Capture model            inherit active tool-capable model
-Config                   ~/.config/opencode/opencode-mem.jsonc
-Note                     Seeded once; user edits are preserved.
+durandal                 Qwen3.5 2B
+durandal-fast            Qwen3.5 0.8B
+spark                    Qwen3.5 2B
+spark-fast               Qwen3.5 0.8B
+rasputin                 Qwen3.5 2B
+rasputin-fast            Qwen3.5 0.8B
 
-PLUGIN RUNTIME
-Desktop notifications    notify-send via libnotify
-Goal max auto turns      8
-Goal max duration        900s
-DCP load order           last
-TUI config seed          ~/.config/opencode/tui.json (only if absent)
+OPENCODE
+opencode-local            Qwen3.5 2B
+opencode-local-fast       Qwen3.5 0.8B
+opencode-local-qwen-coder Qwen2.5-Coder 3B
 
-OPENCODE AGENT ALIASES
-opencode-local             Qwen3.5 9B
-opencode-local-fast        Qwen3.5 4B
-opencode-local-qwen-coder  Qwen2.5-Coder 14B
-opencode-local-gemma4-e2b  Gemma 4 E2B
-opencode-local-gemma4-e4b  Gemma 4 E4B
-opencode-local-gemma4-12b  Gemma 4 12B
-
-OPENCODE BEHAVIOR
-Installed by               nix_ai_setup
-Provider                   nix-local
-Endpoint                   http://127.0.0.1:11435/v1
-Provider enforcement       forced by OPENCODE_CONFIG_CONTENT
-Project config override    cannot silently switch these launchers to cloud
-Build agent max steps      12
-Plan agent max steps       12
-Task delegation            disabled
-Sharing                    disabled
-OpenCode autoupdate        disabled; package updates come from Nix
-Small model                local-fast:latest / Qwen3.5 4B
-Normal opencode command    untouched; keeps normal user providers/config
-Plugin suite               enabled on every local OpenCode launcher
-
-Only models with native Ollama tool calling are exposed as OpenCode agents.
-DeepSeek Coder V2, StarCoder2, and Granite Code remain available through:
-  deepseek-chat
-  starcoder-chat
-  granite-chat
-
-HERMES RUNTIME
-Ollama runtime context     65536 tokens for every Hermes-capable model
-Hermes context_length      65536 tokens
-Hermes ollama_num_ctx      65536 tokens
-Hermes max_tokens          ${toString cfg.hermesMaxTokens}
-Fallback model             local-coder:latest / Qwen3.5 9B
-Fallback trigger           after Hermes exhausts invalid/empty-response retries
-Minimum required by Hermes 64000 tokens
-32K Qwen2.5-Coder          OpenCode/direct only; not exposed through Hermes
-Gemma 4 Hermes status      optional only; current Ollama tool-call parsing can be unreliable
-
-HERMES — DURANDAL
-durandal                   Qwen3.5 9B (default)
-durandal-fast              Qwen3.5 4B
-durandal-gemma4-e2b        Gemma 4 E2B
-durandal-gemma4-e4b        Gemma 4 E4B
-durandal-gemma4-12b        Gemma 4 12B
-
-Backward-compatible aliases:
-hermes-coder               Qwen3.5 9B
-hermes-fast                Qwen3.5 4B
-hermes-gemma4-e2b          Gemma 4 E2B
-hermes-gemma4-e4b          Gemma 4 E4B
-hermes-gemma4-12b          Gemma 4 12B
-
-HERMES — 343 GUILTY SPARK
-spark                      Qwen3.5 9B (default)
-spark-fast                 Qwen3.5 4B
-spark-gemma4-e2b           Gemma 4 E2B
-spark-gemma4-e4b           Gemma 4 E4B
-spark-gemma4-12b           Gemma 4 12B
-
-HERMES — RASPUTIN
-rasputin                   Qwen3.5 9B (default)
-rasputin-fast              Qwen3.5 4B
-rasputin-gemma4-e2b        Gemma 4 E2B
-rasputin-gemma4-e4b        Gemma 4 E4B
-rasputin-gemma4-12b        Gemma 4 12B
-
-DIRECT CHAT / COMPLETION ONLY
-qwen-coder-chat            Qwen2.5-Coder 14B (32K native; below Hermes 64K minimum)
-deepseek-chat              DeepSeek Coder V2 16B
-starcoder-chat             StarCoder2 Instruct
-granite-chat               Granite Code 8B
+DIRECT CHAT
+qwen-coder-chat           Qwen2.5-Coder 3B
+gemma-chat                Gemma 3 1B
 
 MODEL MANAGEMENT
-ollama-get-coder
-ollama-get-fast
-ollama-get-deepseek-coder
-ollama-get-qwen-coder
-ollama-get-starcoder
-ollama-get-granite-code
-ollama-get-gemma4-e2b
-ollama-get-gemma4-e4b
-ollama-get-gemma4-12b
-ollama-get-models           Install all configured models sequentially
-ollama-sync-contexts        Retune installed aliases to current runtime contexts
-ollama-sync-model-contexts  Alias for ollama-sync-contexts
-ollama list                 Show installed Ollama models
-ollama ps                   Show loaded model and GPU residency
+ollama-get-coder          Install Qwen3.5 2B
+ollama-get-fast           Install Qwen3.5 0.8B
+ollama-get-qwen-coder     Install Qwen2.5-Coder 3B
+ollama-get-chat           Install Gemma 3 1B
+ollama-get-models         Install all laptop models
+ollama-sync-contexts      Retune installed aliases to laptop runtime contexts
+ollama list               Show installed models
+ollama ps                 Show active model / residency
 
 PERSONAS
-Durandal                    durandal-marathon
-343 Guilty Spark            guilty-spark-forerunner
-Rasputin                    rasputin-ikelos
+Durandal                  durandal-marathon
+343 Guilty Spark          guilty-spark-forerunner
+Rasputin                  rasputin-ikelos
 
-HERMES PERSONA SETUP
-hermes-setup                Materialize + verify Durandal/Spark/Rasputin assets
-hermes-setup-personas       Alias for hermes-setup
+NOTES
+Qwen2.5-Coder 3B and Gemma 3 1B are 32K models and are not exposed through Hermes.
+The laptop profile intentionally avoids 4B+ defaults to reduce swap pressure on an 8 GiB shared-memory system.
 
-COMPATIBILITY HELP ALIASES
-hermes-help                 nixai --help
-ollama-models               nixai --help
 EOF
           ;;
         *)
@@ -571,7 +447,7 @@ EOF
 in
 {
   options.services.nix-ai-setup = {
-    enable = lib.mkEnableOption "Alpaca and bounded local AI for a 12 GiB AMD GPU";
+    enable = lib.mkEnableOption "bounded local AI for an 8 GiB Intel-UHD laptop";
     contextLength = lib.mkOption {
       type = lib.types.ints.positive;
       default = 65536;
@@ -579,17 +455,17 @@ in
     };
     maxTokens = lib.mkOption {
       type = lib.types.ints.positive;
-      default = 4096;
-      description = "OpenCode/default bounded output-token limit.";
+      default = 2048;
+      description = "Laptop OpenCode/default bounded output-token limit.";
     };
     hermesMaxTokens = lib.mkOption {
       type = lib.types.ints.positive;
-      default = 16384;
-      description = "Hermes output-token budget. Gemma 4 requires a larger budget to avoid reasoning consuming the entire completion.";
+      default = 4096;
+      description = "Laptop Hermes output-token budget.";
     };
     requestTimeout = lib.mkOption {
       type = lib.types.ints.positive;
-      default = 180;
+      default = 240;
     };
   };
   config = lib.mkIf cfg.enable {
@@ -611,8 +487,8 @@ in
         OLLAMA_CONTEXT_LENGTH = toString cfg.contextLength;
         OLLAMA_NUM_PARALLEL = "1";
         OLLAMA_MAX_LOADED_MODELS = "1";
-        OLLAMA_MAX_QUEUE = "4";
-        OLLAMA_KEEP_ALIVE = "5m";
+        OLLAMA_MAX_QUEUE = "2";
+        OLLAMA_KEEP_ALIVE = "60s";
         OLLAMA_FLASH_ATTENTION = "1";
         OLLAMA_KV_CACHE_TYPE = "q8_0";
         OLLAMA_NO_CLOUD = "1";
@@ -627,86 +503,49 @@ in
       hermesSetup
       hermesLocal
       (hermesDurandal "hermes-local-fast" "local-fast:latest")
-      (hermesDurandal "hermes-local-gemma4-e2b" "local-gemma4-e2b:latest")
-      (hermesDurandal "hermes-local-gemma4-e4b" "local-gemma4-e4b:latest")
-      (hermesDurandal "hermes-local-gemma4-12b" "local-gemma4-12b:latest")
 
       (hermesSpark "hermes-guilty-spark" "local-coder:latest")
       (hermesSpark "hermes-guilty-spark-fast" "local-fast:latest")
-      (hermesSpark "hermes-guilty-spark-gemma4-e2b" "local-gemma4-e2b:latest")
-      (hermesSpark "hermes-guilty-spark-gemma4-e4b" "local-gemma4-e4b:latest")
-      (hermesSpark "hermes-guilty-spark-gemma4-12b" "local-gemma4-12b:latest")
 
       (hermesRasputin "hermes-rasputin" "local-coder:latest")
       (hermesRasputin "hermes-rasputin-fast" "local-fast:latest")
-      (hermesRasputin "hermes-rasputin-gemma4-e2b" "local-gemma4-e2b:latest")
-      (hermesRasputin "hermes-rasputin-gemma4-e4b" "local-gemma4-e4b:latest")
-      (hermesRasputin "hermes-rasputin-gemma4-12b" "local-gemma4-12b:latest")
+
       (openCodeLauncher "opencode-local" "nix-local/local-coder:latest")
       (openCodeLauncher "opencode-local-fast" "nix-local/local-fast:latest")
       (openCodeLauncher "opencode-local-qwen-coder" "nix-local/local-qwen-coder:latest")
-      (openCodeLauncher "opencode-local-gemma4-e2b" "nix-local/local-gemma4-e2b:latest")
-      (openCodeLauncher "opencode-local-gemma4-e4b" "nix-local/local-gemma4-e4b:latest")
-      (openCodeLauncher "opencode-local-gemma4-12b" "nix-local/local-gemma4-12b:latest")
     ];
     environment.etc."nix-ai-setup/hermes.yaml".source = hermesConfig;
     environment.etc."nix-ai-setup/opencode.json".source = openCodeConfig;
     programs.zsh.shellAliases = {
       hermes-setup-personas = "hermes-setup";
       ollama-sync-model-contexts = "ollama-sync-contexts";
+
       durandal = "hermes-local";
       durandal-fast = "hermes-local-fast";
-      durandal-gemma4-e2b = "hermes-local-gemma4-e2b";
-      durandal-gemma4-e4b = "hermes-local-gemma4-e4b";
-      durandal-gemma4-12b = "hermes-local-gemma4-12b";
-
-      # Backward-compatible Durandal aliases.
       hermes-coder = "hermes-local";
       hermes-fast = "hermes-local-fast";
-      hermes-gemma4-e2b = "hermes-local-gemma4-e2b";
-      hermes-gemma4-e4b = "hermes-local-gemma4-e4b";
-      hermes-gemma4-12b = "hermes-local-gemma4-12b";
 
       spark = "hermes-guilty-spark";
       spark-fast = "hermes-guilty-spark-fast";
-      spark-gemma4-e2b = "hermes-guilty-spark-gemma4-e2b";
-      spark-gemma4-e4b = "hermes-guilty-spark-gemma4-e4b";
-      spark-gemma4-12b = "hermes-guilty-spark-gemma4-12b";
 
       rasputin = "hermes-rasputin";
       rasputin-fast = "hermes-rasputin-fast";
-      rasputin-gemma4-e2b = "hermes-rasputin-gemma4-e2b";
-      rasputin-gemma4-e4b = "hermes-rasputin-gemma4-e4b";
-      rasputin-gemma4-12b = "hermes-rasputin-gemma4-12b";
 
-      # These models are useful for direct coding/chat, but Ollama does not
-      # advertise native tool calling for them, so they are intentionally not
-      # exposed through Hermes or OpenCode agent launchers.
       qwen-coder-chat = "ollama run local-qwen-coder:latest";
-      deepseek-chat = "ollama run local-deepseek-coder:latest";
-      starcoder-chat = "ollama run local-starcoder:latest";
-      granite-chat = "ollama run local-granite-code:latest";
+      gemma-chat = "ollama run local-chat:latest";
+
       ollama-models = "nixai --help";
       hermes-help = "nixai --help";
+
       ollama-get-coder = installModel "local-coder" aliases.local-coder;
       ollama-get-fast = installModel "local-fast" aliases.local-fast;
-      ollama-get-deepseek-coder = installModel "local-deepseek-coder" aliases.local-deepseek-coder;
       ollama-get-qwen-coder = installModel "local-qwen-coder" aliases.local-qwen-coder;
-      ollama-get-starcoder = installModel "local-starcoder" aliases.local-starcoder;
-      ollama-get-granite-code = installModel "local-granite-code" aliases.local-granite-code;
-      ollama-get-gemma4-e2b = installModel "local-gemma4-e2b" aliases.local-gemma4-e2b;
-      ollama-get-gemma4-e4b = installModel "local-gemma4-e4b" aliases.local-gemma4-e4b;
-      ollama-get-gemma4-12b = installModel "local-gemma4-12b" aliases.local-gemma4-12b;
+      ollama-get-chat = installModel "local-chat" aliases.local-chat;
       ollama-get-models = lib.concatStringsSep " && " [
         (installModel "local-coder" aliases.local-coder)
         (installModel "local-fast" aliases.local-fast)
-        (installModel "local-deepseek-coder" aliases.local-deepseek-coder)
         (installModel "local-qwen-coder" aliases.local-qwen-coder)
-        (installModel "local-starcoder" aliases.local-starcoder)
-        (installModel "local-granite-code" aliases.local-granite-code)
-        (installModel "local-gemma4-e2b" aliases.local-gemma4-e2b)
-        (installModel "local-gemma4-e4b" aliases.local-gemma4-e4b)
-        (installModel "local-gemma4-12b" aliases.local-gemma4-12b)
+        (installModel "local-chat" aliases.local-chat)
       ];
     };
     systemd.services.nix-ai-gateway = {
